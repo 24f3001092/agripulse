@@ -1,0 +1,84 @@
+{
+  "catalog_version": 1,
+  "datasets": [
+    {
+      "table_name": "weather",
+      "layer": "silver",
+      "source_name": "open-meteo-forecast-api",
+      "source_url": "https://api.open-meteo.com/v1/forecast",
+      "source_type": "REST API (public, no key required)",
+      "refresh_frequency": "daily",
+      "owner": "data-engineering-intern",
+      "grain": "one row per region per date",
+      "columns": {
+        "region_name": "string - agricultural region identifier, joins to geo.state_name",
+        "date": "date - observation date (past 30d) or forecast date (next 7d)",
+        "temp_max_c": "float - daily max temperature, Celsius",
+        "temp_min_c": "float - daily min temperature, Celsius",
+        "precipitation_mm": "float - daily total precipitation, millimeters",
+        "humidity_pct": "float - mean relative humidity, percent",
+        "windspeed_max_kmh": "float - max wind speed, km/h"
+      },
+      "quality_contract": "src/quality/schemas.py::weather_schema",
+      "known_limitations": "In this sandbox, generated via schema-identical synthetic fixture (src/ingestion/weather_fixture_generator.py) because outbound access to api.open-meteo.com is blocked by network policy. Production runs use weather_api.py against the live API."
+    },
+    {
+      "table_name": "ag_exports",
+      "layer": "silver",
+      "source_name": "us-ag-exports-2011",
+      "source_url": "https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv",
+      "source_type": "Static CSV (public GitHub-hosted dataset)",
+      "refresh_frequency": "static (proxy for a market-intelligence feed in this demo build)",
+      "owner": "data-engineering-intern",
+      "grain": "one row per US state",
+      "columns": {
+        "state_code": "string - 2-letter state code",
+        "state_name": "string - full state name, joins to geo.state_name and weather.region_name",
+        "total_exports_musd": "float - total agricultural exports, millions USD",
+        "corn_musd": "float - corn export value, millions USD",
+        "wheat_musd": "float - wheat export value, millions USD",
+        "cotton_musd": "float - cotton export value, millions USD",
+        "dairy_musd": "float - dairy export value, millions USD"
+      },
+      "quality_contract": "src/quality/schemas.py::ag_exports_schema"
+    },
+    {
+      "table_name": "geo",
+      "layer": "silver",
+      "source_name": "us-state-capitals",
+      "source_url": "https://raw.githubusercontent.com/jasperdebie/VisInfo/master/us-state-capitals.csv",
+      "source_type": "Static CSV (public GitHub-hosted dataset)",
+      "refresh_frequency": "static",
+      "owner": "data-engineering-intern",
+      "grain": "one row per US state",
+      "columns": {
+        "state_name": "string - full state name",
+        "capital": "string - state capital city, used as regional coordinate proxy",
+        "latitude": "float - decimal degrees",
+        "longitude": "float - decimal degrees"
+      },
+      "quality_contract": "src/quality/schemas.py::geo_schema"
+    },
+    {
+      "table_name": "region_daily_features",
+      "layer": "gold",
+      "source_name": "derived (weather + ag_exports + geo joined)",
+      "refresh_frequency": "daily",
+      "owner": "data-engineering-intern",
+      "grain": "one row per region per date",
+      "partitioned_by": "region_name",
+      "format": "Delta Lake (falls back to partitioned Parquet if Delta jar unavailable)",
+      "downstream_consumers": ["src/ml/demand_forecast_model.py", "sales forecasting model (future)"]
+    },
+    {
+      "table_name": "region_summary",
+      "layer": "gold",
+      "source_name": "derived (aggregated from region_daily_features)",
+      "refresh_frequency": "daily",
+      "owner": "data-engineering-intern",
+      "grain": "one row per region",
+      "format": "Delta Lake (falls back to partitioned Parquet if Delta jar unavailable)",
+      "downstream_consumers": ["BI dashboards", "marketing segmentation model (future)"]
+    }
+  ]
+}
