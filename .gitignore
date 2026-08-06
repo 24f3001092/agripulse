@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Generated data layers -- reproducible from source, not source-controlled
+data/bronze/*
+data/silver/*
+data/gold/*
+!data/bronze/.gitkeep
+!data/silver/.gitkeep
+!data/gold/.gitkeep
+
+catalog/health_report.json

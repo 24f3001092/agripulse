@@ -1,0 +1,15 @@
+{
+  "_comment": "Agricultural regions monitored by AgriPulse. Coordinates sourced from data/bronze/us_state_geo_raw.csv (state capitals used as regional proxy points). Extend this file to onboard new regions without touching pipeline code.",
+  "regions": [
+    {"region_name": "Iowa",        "state_code": "IA", "latitude": 41.590939,  "longitude": -93.620866},
+    {"region_name": "Illinois",    "state_code": "IL", "latitude": 39.798363,  "longitude": -89.654961},
+    {"region_name": "Nebraska",    "state_code": "NE", "latitude": 40.809868,  "longitude": -96.675345},
+    {"region_name": "Kansas",      "state_code": "KS", "latitude": 39.048191,  "longitude": -95.677956},
+    {"region_name": "California",  "state_code": "CA", "latitude": 38.576668,  "longitude": -121.493629},
+    {"region_name": "Texas",       "state_code": "TX", "latitude": 30.274670,  "longitude": -97.740349},
+    {"region_name": "Minnesota",   "state_code": "MN", "latitude": 44.955097,  "longitude": -93.102211},
+    {"region_name": "Indiana",     "state_code": "IN", "latitude": 39.768623,  "longitude": -86.162643},
+    {"region_name": "North Dakota","state_code": "ND", "latitude": 46.813343,  "longitude": -100.779004},
+    {"region_name": "Arkansas",    "state_code": "AR", "latitude": 34.746613,  "longitude": -92.288986}
+  ]
+}
