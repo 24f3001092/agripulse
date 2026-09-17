@@ -5,4 +5,12 @@ pandera>=0.20
 pyspark==3.5.1
 delta-spark==3.2.0
 scikit-learn>=1.4
+streamlit>=1.40
+plotly>=5.18
+pytest>=7.4
 apache-airflow>=2.9  # only needed on the Airflow host running dags/agripulse_dag.py
+# Airflow 3.x on Linux additionally needs the standard providers for
+# BashOperator/PythonOperator and common-io for ObjectStoragePath. Uncomment
+# on the Airflow host only (Airflow does not run on Windows natively):
+#   apache-airflow-providers-standard
+#   apache-airflow-providers-common-io

@@ -20,6 +20,7 @@ Run:
 """
 
 import logging
+import shutil
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -28,6 +29,22 @@ logger = logging.getLogger("silver_to_gold")
 BASE = Path(__file__).resolve().parents[2]
 SILVER = BASE / "data" / "silver"
 GOLD = BASE / "data" / "gold"
+
+
+def clean_output_dir(path: Path) -> None:
+    """
+    Fully remove a Gold output directory before overwriting it.
+
+    Spark's Delta `mode("overwrite")` correctly replaces a *previous Delta
+    table* but leaves stale data files behind when the existing directory was
+    written by the plain-Parquet fallback (mixed-format upgrade path). Re-running
+    the pipeline would then accumulate duplicate rows in the Gold layer and
+    corrupt downstream ML row counts. Because this table is fully recomputed
+    every run, deleting the stale directory first keeps every run idempotent.
+    """
+    if path.exists():
+        shutil.rmtree(path)
+        logger.info(f"Cleared stale Gold output dir: {path}")
 
 
 def get_spark_session():
@@ -118,6 +135,7 @@ def build_gold_table(spark, delta_available: bool):
 
     GOLD.mkdir(parents=True, exist_ok=True)
     gold_path = GOLD / "region_daily_features"
+    clean_output_dir(gold_path)
 
     if delta_available:
         (gold_df.write.format("delta")
@@ -154,6 +172,7 @@ def build_gold_table(spark, delta_available: bool):
     summary_df.show(20, truncate=False)
 
     summary_path = GOLD / "region_summary"
+    clean_output_dir(summary_path)
     fmt = "delta" if delta_available else "parquet"
     summary_df.write.format(fmt).mode("overwrite").save(str(summary_path))
     logger.info(f"Wrote region summary table ({fmt}) -> {summary_path}")

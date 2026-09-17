@@ -13,4 +13,10 @@ data/gold/*
 !data/silver/.gitkeep
 !data/gold/.gitkeep
 
+# Generated catalog outputs
 catalog/health_report.json
+catalog/model_report.json
+catalog/prediction_run.json
+
+# Windows Hadoop native libraries (large binaries, platform-specific)
+hadoop-utils/

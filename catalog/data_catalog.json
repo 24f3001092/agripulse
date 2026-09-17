@@ -20,7 +20,7 @@
         "windspeed_max_kmh": "float - max wind speed, km/h"
       },
       "quality_contract": "src/quality/schemas.py::weather_schema",
-      "known_limitations": "In this sandbox, generated via schema-identical synthetic fixture (src/ingestion/weather_fixture_generator.py) because outbound access to api.open-meteo.com is blocked by network policy. Production runs use weather_api.py against the live API."
+      "known_limitations": "Live pull from the Open-Meteo Forecast API; if the API is unreachable (network-restricted sandbox) the pipeline falls back to schema-identical synthetic fixtures (src/ingestion/weather_fixture_generator.py)."
     },
     {
       "table_name": "ag_exports",
@@ -68,7 +68,7 @@
       "grain": "one row per region per date",
       "partitioned_by": "region_name",
       "format": "Delta Lake (falls back to partitioned Parquet if Delta jar unavailable)",
-      "downstream_consumers": ["src/ml/demand_forecast_model.py", "sales forecasting model (future)"]
+      "downstream_consumers": ["src/ml/demand_forecast_model.py", "src/ml/prediction_pipeline.py", "app.py"]
     },
     {
       "table_name": "region_summary",
@@ -78,7 +78,41 @@
       "owner": "data-engineering-intern",
       "grain": "one row per region",
       "format": "Delta Lake (falls back to partitioned Parquet if Delta jar unavailable)",
-      "downstream_consumers": ["BI dashboards", "marketing segmentation model (future)"]
+      "downstream_consumers": ["app.py"]
+    },
+    {
+      "table_name": "forecast_results",
+      "layer": "gold",
+      "source_name": "derived (src/ml/demand_forecast_model.py on region_summary weather/export features)",
+      "refresh_frequency": "daily",
+      "owner": "data-engineering-intern",
+      "grain": "one row per region (prototype in-sample forecast)",
+      "format": "Parquet (data/gold/forecast_results.parquet)",
+      "columns": {
+        "region_name": "string",
+        "actual_exports_musd": "float - observed total exports, millions USD",
+        "predicted_exports_musd": "float - LinearRegression prediction, millions USD",
+        "difference_musd": "float - actual minus predicted",
+        "prediction_error_pct": "float - relative error percent, null when actual is zero"
+      },
+      "downstream_consumers": ["app.py", "catalog/model_report.json"]
+    },
+    {
+      "table_name": "region_segments",
+      "layer": "gold",
+      "source_name": "derived (src/ml/marketing_segmentation.py on region_daily_features)",
+      "refresh_frequency": "daily",
+      "owner": "data-engineering-intern",
+      "grain": "one row per region (rule-based analytical grouping)",
+      "format": "Parquet (data/gold/region_segments.parquet)",
+      "columns": {
+        "region_name": "string",
+        "segment": "string - tier > dominant-crop label (analytical, not commercial)",
+        "segment_reason": "string - observed numbers supporting the assignment",
+        "export_tier": "string - High/Mid/Emerging-Export by terciles",
+        "dominant_crop": "string - corn/wheat/cotton/dairy/diversified"
+      },
+      "downstream_consumers": ["app.py"]
     }
   ]
 }
