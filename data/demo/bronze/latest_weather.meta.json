@@ -1,0 +1,9 @@
+{
+  "source_name": "open-meteo-forecast-api",
+  "source_url": "https://api.open-meteo.com/v1/forecast",
+  "ingested_at_utc": "20260917T195409Z",
+  "region_count": 10,
+  "row_count": 10,
+  "status": "success",
+  "notes": ""
+}

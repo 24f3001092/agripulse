@@ -1,0 +1,34 @@
+{
+  "model_name": "linear-regression-weather-to-export-prototype",
+  "model_family": "scikit-learn LinearRegression",
+  "model_status": "prototype",
+  "target_variable": "total_exports_musd",
+  "feature_names": [
+    "avg_temp_c",
+    "total_precip_mm",
+    "avg_humidity_pct",
+    "avg_windspeed"
+  ],
+  "row_count": 10,
+  "region_count": 10,
+  "evaluation_methodology": "in-sample fit (no held-out split -- sample too small)",
+  "metrics": {
+    "mae_musd": 1940.0488,
+    "r2": 0.6479,
+    "mape_pct": 33.4738,
+    "metrics_are_in_sample": true
+  },
+  "coefficients": {
+    "avg_temp_c": -696.860715,
+    "total_precip_mm": 40.315677,
+    "avg_humidity_pct": -532.199934,
+    "avg_windspeed": -715.666744
+  },
+  "small_sample_warning": "Only 10 regions available (minimum 15 for a held-out split). Metrics are IN-SAMPLE (model trained and evaluated on the same rows) and must not be read as out-of-sample accuracy. A production forecaster needs many more regions and/or historical periods.",
+  "limitations": [
+    "Prototype model: linear relationship between a short weather window and annual export value; not a validated production forecaster.",
+    "Export figures are a single annual cross-section (2011 USDA dataset); there is no multi-year history, so the model cannot demonstrate temporal forecast skill.",
+    "In-sample metrics (where reported) do not estimate out-of-sample performance."
+  ],
+  "generated_at_utc": "2026-09-17T19:58:12.204391+00:00"
+}

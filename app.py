@@ -14,7 +14,8 @@ artifacts:
     catalog/model_report.json          (model/report metadata)
 
 No hard-coded numbers: every metric on this page traces back to a generated
-file, and missing files are reported instead of being silently replaced.
+file (or a tracked deployment copy under data/demo/), and missing files are
+reported instead of being silently replaced.
 Charts read the same frames the metrics are computed from.
 
 Run:
@@ -32,6 +33,44 @@ GOLD = BASE / "data" / "gold"
 SILVER = BASE / "data" / "silver"
 BRONZE = BASE / "data" / "bronze"
 CATALOG = BASE / "catalog"
+DEMO = BASE / "data" / "demo"
+
+# Artifact registry: preferred source is the locally generated pipeline output;
+# if it was not generated (e.g. a Streamlit Cloud checkout, where the generated
+# files above are gitignored), the dashboard falls back to the tracked real
+# pipeline outputs committed under data/demo/.
+ARTIFACTS = {
+    "gold_daily": (GOLD / "region_daily_features", DEMO / "gold" / "region_daily_features.parquet"),
+    "gold_summary": (GOLD / "region_summary", DEMO / "gold" / "region_summary.parquet"),
+    "forecast": (GOLD / "forecast_results.parquet", DEMO / "gold" / "forecast_results.parquet"),
+    "segments": (GOLD / "region_segments.parquet", DEMO / "gold" / "region_segments.parquet"),
+    "health": (CATALOG / "health_report.json", DEMO / "catalog" / "health_report.json"),
+    "model": (CATALOG / "model_report.json", DEMO / "catalog" / "model_report.json"),
+    "silver_weather": (SILVER / "weather.parquet", DEMO / "silver" / "weather.parquet"),
+    "silver_exports": (SILVER / "ag_exports.parquet", DEMO / "silver" / "ag_exports.parquet"),
+    "silver_geo": (SILVER / "geo.parquet", DEMO / "silver" / "geo.parquet"),
+}
+
+# Tracks where each artifact was actually read from for honest reporting.
+_ARTIFACT_SOURCE: dict[str, str] = {}
+
+
+def resolve_artifact(key: str) -> tuple[Path, str] | None:
+    """Return (path, source) where source is 'live' or 'demo', or None if absent."""
+    live, demo = ARTIFACTS[key]
+    if live.exists():
+        _ARTIFACT_SOURCE[key] = "live"
+        return live, "live"
+    if demo.exists():
+        _ARTIFACT_SOURCE[key] = "demo"
+        return demo, "demo"
+    _ARTIFACT_SOURCE[key] = "missing"
+    return None
+
+
+def using_demo_artifacts() -> bool:
+    """True when this session had to fall back to tracked data/demo artifacts."""
+    return "demo" in _ARTIFACT_SOURCE.values()
 
 ACCENT = "#2E7D32"   # agri green
 AMBER = "#F9A825"    # secondary accent
@@ -89,13 +128,13 @@ def style_fig(fig, height: int | None = None, unified: bool = False) -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Data loaders (all defensive: return None if the artifact is missing)
+# Data loaders (live artifacts preferred; tracked data/demo/ as fallback)
 # --------------------------------------------------------------------------- #
-@st.cache_data(show_spinner=False)
-def load_gold_daily() -> pd.DataFrame | None:
-    path = GOLD / "region_daily_features"
-    if not path.exists():
+def _read_parquet(key: str) -> pd.DataFrame | None:
+    resolved = resolve_artifact(key)
+    if resolved is None:
         return None
+    path, _source = resolved
     try:
         return pd.read_parquet(path)
     except Exception as exc:  # noqa: BLE001 - surface any read error to the user
@@ -104,39 +143,23 @@ def load_gold_daily() -> pd.DataFrame | None:
 
 
 @st.cache_data(show_spinner=False)
+def load_gold_daily() -> pd.DataFrame | None:
+    return _read_parquet("gold_daily")
+
+
+@st.cache_data(show_spinner=False)
 def load_summary() -> pd.DataFrame | None:
-    path = GOLD / "region_summary"
-    if not path.exists():
-        return None
-    try:
-        return pd.read_parquet(path)
-    except Exception as exc:  # noqa: BLE001
-        st.error(f"Could not read {path}: {exc}")
-        return None
+    return _read_parquet("gold_summary")
 
 
 @st.cache_data(show_spinner=False)
 def load_forecast() -> pd.DataFrame | None:
-    path = GOLD / "forecast_results.parquet"
-    if not path.exists():
-        return None
-    try:
-        return pd.read_parquet(path)
-    except Exception as exc:  # noqa: BLE001
-        st.error(f"Could not read {path}: {exc}")
-        return None
+    return _read_parquet("forecast")
 
 
 @st.cache_data(show_spinner=False)
 def load_segments() -> pd.DataFrame | None:
-    path = GOLD / "region_segments.parquet"
-    if not path.exists():
-        return None
-    try:
-        return pd.read_parquet(path)
-    except Exception as exc:  # noqa: BLE001
-        st.error(f"Could not read {path}: {exc}")
-        return None
+    return _read_parquet("segments")
 
 
 def load_json(rel_path: Path) -> dict | None:
@@ -153,25 +176,31 @@ def load_json(rel_path: Path) -> dict | None:
 
 @st.cache_data(show_spinner=False)
 def load_health_report() -> dict | None:
-    return load_json(CATALOG / "health_report.json")
+    resolved = resolve_artifact("health")
+    return load_json(resolved[0]) if resolved else None
 
 
 @st.cache_data(show_spinner=False)
 def load_model_report() -> dict | None:
-    return load_json(CATALOG / "model_report.json")
+    resolved = resolve_artifact("model")
+    return load_json(resolved[0]) if resolved else None
 
 
 @st.cache_data(show_spinner=False)
 def load_latest_ingestion_meta() -> dict | None:
     metas = sorted(BRONZE.glob("*.meta.json")) if BRONZE.exists() else []
-    if not metas:
-        return None
-    return load_json(metas[-1])
+    if metas:
+        return load_json(metas[-1])
+    demo_meta = DEMO / "bronze" / "latest_weather.meta.json"
+    return load_json(demo_meta) if demo_meta.exists() else None
 
 
 def missing_artifact(name: str) -> None:
     st.markdown(f'<div class="app-banner"><b>Data not found</b><br/>{name}</div>', unsafe_allow_html=True)
-    st.info("Generate it first with the pipeline, then refresh this page:")
+    st.info(
+        "This artifact is not present locally and has no tracked copy under "
+        "`data/demo/`. Regenerate it with the pipeline, then refresh this page:"
+    )
     st.code("python run_pipeline.py --skip-ingestion", language="bash")
 
 
@@ -508,18 +537,26 @@ def page_health() -> None:
 
     st.subheader("Artifact presence")
     rows = []
-    for name, path in [
-        ("Silver weather", SILVER / "weather.parquet"),
-        ("Silver exports", SILVER / "ag_exports.parquet"),
-        ("Silver geo", SILVER / "geo.parquet"),
-        ("Gold region_daily_features", GOLD / "region_daily_features"),
-        ("Gold region_summary", GOLD / "region_summary"),
-        ("Forecast results", GOLD / "forecast_results.parquet"),
-        ("Segments", GOLD / "region_segments.parquet"),
-        ("Model report", CATALOG / "model_report.json"),
+    for name, key in [
+        ("Silver weather", "silver_weather"),
+        ("Silver exports", "silver_exports"),
+        ("Silver geo", "silver_geo"),
+        ("Gold region_daily_features", "gold_daily"),
+        ("Gold region_summary", "gold_summary"),
+        ("Forecast results", "forecast"),
+        ("Segments", "segments"),
+        ("Model report", "model"),
+        ("Health report", "health"),
     ]:
-        present = "Present" if path.exists() else "Missing"
-        rows.append({"artifact": name, "present": present})
+        resolved = resolve_artifact(key)
+        if resolved is None:
+            rows.append({"artifact": name, "present": "Missing", "source": "not available"})
+            continue
+        _path, source = resolved
+        if source == "live":
+            rows.append({"artifact": name, "present": "Present", "source": "live generated artifact"})
+        else:
+            rows.append({"artifact": name, "present": "Present", "source": "tracked data/demo artifact"})
 
     presence = pd.DataFrame(rows)
 
@@ -527,6 +564,15 @@ def page_health() -> None:
         return "color:#2E7D32;" if val == "Present" else "color:#B71C1C; font-weight:600;"
 
     st.dataframe(presence.style.map(_color, subset=["present"]), width="stretch")
+
+    if using_demo_artifacts():
+        st.caption(
+            "Using the latest tracked pipeline artifact for deployment where live "
+            "generated output is unavailable locally. Sources are labeled per artifact "
+            "above; live/generated locally means it was produced by the pipeline on "
+            "this host, tracked data/demo artifact means it was committed to the "
+            "repository for Streamlit Community Cloud."
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -541,7 +587,10 @@ def main() -> None:
         ["Overview", "Regional Intelligence", "Forecast", "Marketing Segments", "Data Health"],
     )
 
-    st.sidebar.caption("Reads Gold-layer and catalog artifacts generated by `run_pipeline.py`.")
+    st.sidebar.caption(
+        "Reads Gold-layer and catalog artifacts (locally generated, or tracked "
+        "deployment copies under `data/demo/`)."
+    )
 
     if page == "Overview":
         page_overview()

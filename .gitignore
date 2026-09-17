@@ -18,5 +18,16 @@ catalog/health_report.json
 catalog/model_report.json
 catalog/prediction_run.json
 
+# NOTE: data/demo/ holds the REAL, minimum pipeline outputs that the deployed
+# Streamlit Cloud dashboard reads when local generated artifacts are absent
+# (generated files above are gitignored, so they never reach the repo).
+# data/demo/ is intentionally tracked -- do NOT ignore it.
+
+# Secrets and credentials -- never commit these
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
 # Windows Hadoop native libraries (large binaries, platform-specific)
 hadoop-utils/
