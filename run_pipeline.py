@@ -1,13 +1,21 @@
 """
 run_pipeline.py
 
-Single-command orchestrator for the full AgriPulse pipeline:
+Single-command orchestrator for the full AgriPulse pipeline (active profile:
+INDIA -- data/india/..., catalog/india/...):
 
-    1. Ingest        - weather fixture / live API (market + geo are static CSVs in bronze/)
-    2. Bronze->Silver  - clean, validate (pandera)
-    3. Silver->Gold    - join, aggregate, write Delta/Parquet (PySpark + Spark SQL)
-    4. Monitor         - freshness + row-count health report
-    5. Prediction      - export forecast + regional segmentation (ML outputs)
+    1. Ingest        - weather via live Open-Meteo API (or sandbox fixture)
+                       + geography from catalog/india_regions.json
+    2. Bronze->Silver  - clean, validate (pandera India contracts)
+    3. Silver->Gold    - PySpark region features + integrated India agricultural
+                         Gold layer (region x date features, crop summary,
+                         market summary) under data/india/gold/
+    4. India forecast  - one-year-ahead crop-production forecast (naive/gradient
+                         boosting, temporal split; prototype, no fabrication)
+    5. Monitor         - freshness, row counts + India artifact quality checks
+                         (data/india/catalog/health_report.json)
+    6. Prediction      - weather-exposure segmentation; market-price forecast is
+                         GATED on the e-NAM/AGMARKNET source (ml_status.json)
 
 Usage:
     python run_pipeline.py                   # full run (re-ingests weather)
@@ -31,6 +39,8 @@ logger = logging.getLogger("run_pipeline")
 BASE = Path(__file__).resolve().parent
 SRC = BASE / "src"
 HADOOP_UTILS = BASE / "hadoop-utils" / "bin"
+sys.path.insert(0, str(SRC))
+import config  # noqa: E402
 
 
 def resolve_java_home() -> str:
@@ -81,7 +91,7 @@ def build_subprocess_env() -> dict:
 
 def latest_ingestion_status() -> str:
     """Read the newest weather ingestion's status from its meta file (e.g. 'success')."""
-    meta_files = sorted((BASE / "data" / "bronze").glob("*.meta.json"))
+    meta_files = sorted(config.BRONZE.glob("*.meta.json"))
     if not meta_files:
         return ""
     import json as _json
@@ -109,21 +119,32 @@ def build_summary(ingested: bool) -> str:
         f" Ingestion executed            : {'yes' if ingested else 'skipped (--skip-ingestion)'}",
         " Expected outputs (%s):" % ("refreshed" if ingested else "verified present"),
     ]
-    for rel in [
-        "data/bronze/weather_raw_*.json",
-        "data/silver/weather.parquet",
-        "data/silver/ag_exports.parquet",
-        "data/silver/geo.parquet",
-        "data/gold/region_daily_features",
-        "data/gold/region_summary",
-        "catalog/health_report.json",
-        "data/gold/forecast_results.parquet",
-        "data/gold/region_segments.parquet",
-        "catalog/model_report.json",
-        "catalog/prediction_run.json",
+    for rel, note in [
+        ("data/india/bronze/weather_raw_*.json", ""),
+        ("data/india/silver/weather.parquet", ""),
+        ("data/india/silver/geo.parquet", ""),
+        ("data/india/gold/region_daily_features", ""),
+        ("data/india/gold/region_summary", ""),
+        ("data/india/catalog/health_report.json", ""),
+        ("data/india/gold/region_segments.parquet", ""),
+        ("data/india/catalog/ml_status.json", ""),
+        ("data/india/catalog/prediction_run.json", ""),
+        ("data/india/gold/forecast_results.parquet", "[optional -- market-gated]"),
+        ("data/india/catalog/model_report.json", "[optional -- market-gated]"),
+        ("data/india/gold/india_market_summary/manifest.json", "[optional -- when mandi bronze exists]"),
+        ("data/india/silver/india_mandi.parquet", "[optional -- when mandi bronze exists]"),
+        ("data/india/silver/india_agriculture.parquet", "[optional -- when agriculture bronze exists]"),
+        ("data/india/gold/india_region_features/india_region_features.parquet", "[optional -- when weather & mandi bronze exist]"),
+        ("data/india/gold/india_region_features/manifest.json", "[optional -- when weather & mandi bronze exist]"),
+        ("data/india/gold/india_crop_summary/india_crop_summary.parquet", "[optional -- when agriculture bronze exists]"),
+        ("data/india/gold/india_crop_summary/manifest.json", "[optional -- when agriculture bronze exists]"),
+        ("data/india/catalog/gold_lineage.json", ""),
+        ("data/india/gold/india_forecasts.parquet", "[optional -- when agriculture bronze exists]"),
+        ("data/india/catalog/india_model_report.json", "[optional -- when agriculture bronze exists]"),
     ]:
         marker = "OK" if _exists_loose(rel) else "MISSING"
-        lines.append(f"   [{marker:7}] {rel}")
+        label = f"{rel} {note}".rstrip()
+        lines.append(f"   [{marker:7}] {label}")
     lines.append("==================================================")
     return "\n".join(lines)
 
@@ -147,15 +168,15 @@ def main():
 
     if ingested:
         run_step(
-            "Ingestion: market + geo (real external sources, already static CSVs in bronze/)",
-            [py, "-c", "print('Static sources already fetched to data/bronze/ -- see README.md to re-fetch')"],
+            "Ingestion: geography reference (catalog/india_regions.json -- official-source refinement pending)",
+            [py, "-c", "print('India geography reference read from catalog/india_regions.json (see README for official-source refinement)')"],
             BASE, env,
         )
         run_step(
             "Ingestion: weather (live Open-Meteo API)",
             [py, str(SRC / "ingestion" / "weather_api.py"),
-             "--config", str(BASE / "catalog" / "regions.json"),
-             "--out", str(BASE / "data" / "bronze")],
+             "--config", str(config.REGIONS_CONFIG),
+             "--out", str(config.BRONZE)],
             BASE, env,
         )
         # Honest sandbox fallback (see README 'Limitations'): if the live API
@@ -170,13 +191,17 @@ def main():
             run_step(
                 "Ingestion: weather (sandbox fixture fallback)",
                 [py, str(SRC / "ingestion" / "weather_fixture_generator.py"),
-                 "--config", str(BASE / "catalog" / "regions.json"),
-                 "--out", str(BASE / "data" / "bronze")],
+                 "--config", str(config.REGIONS_CONFIG),
+                 "--out", str(config.BRONZE)],
                 BASE, env,
             )
 
     run_step("Bronze -> Silver", [py, str(SRC / "transform" / "bronze_to_silver.py")], BASE, env)
-    run_step("Silver -> Gold", [py, str(SRC / "transform" / "silver_to_gold.py")], BASE, env)
+    run_step("Silver -> Gold (region features)", [py, str(SRC / "transform" / "silver_to_gold.py")], BASE, env)
+    run_step("India integrated Gold (region features + crop summary + market summary)",
+             [py, str(SRC / "transform" / "india_silver_to_gold.py")], BASE, env)
+    run_step("India forecast (crop production, prototype -- temporal split, no fabrication)",
+             [py, str(SRC / "ml" / "india_forecast.py")], BASE, env)
     run_step("Monitoring", [py, str(SRC / "quality" / "monitor.py")], BASE, env)
     run_step("Prediction pipeline (forecast + segmentation)",
              [py, str(SRC / "ml" / "prediction_pipeline.py")], BASE, env)

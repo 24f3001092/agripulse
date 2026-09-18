@@ -1,6 +1,7 @@
 """
 test_schemas.py
-Unit tests for the Pandera data-quality contracts. Run with:
+Unit tests for the Pandera data-quality contracts (active profile: India).
+Run with:
     pytest tests/test_schemas.py -v
 """
 
@@ -11,12 +12,17 @@ import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "quality"))
-from schemas import weather_schema, ag_exports_schema, geo_schema, validate_or_report
+from schemas import (  # noqa: E402
+    weather_schema,
+    geo_india_schema,
+    market_commodity_schema,
+    validate_or_report,
+)
 
 
 def test_weather_schema_accepts_valid_row():
     df = pd.DataFrame([{
-        "region_name": "Iowa", "date": "2026-08-01",
+        "region_name": "Nashik", "date": "2026-09-01",
         "temp_max_c": 30.0, "temp_min_c": 18.0,
         "precipitation_mm": 2.5, "humidity_pct": 70.0, "windspeed_max_kmh": 12.0,
     }])
@@ -27,7 +33,7 @@ def test_weather_schema_accepts_valid_row():
 
 def test_weather_schema_rejects_impossible_temp():
     df = pd.DataFrame([{
-        "region_name": "Iowa", "date": "2026-08-01",
+        "region_name": "Nashik", "date": "2026-09-01",
         "temp_max_c": 15.0, "temp_min_c": 25.0,  # min > max -- physically invalid
         "precipitation_mm": 2.5, "humidity_pct": 70.0, "windspeed_max_kmh": 12.0,
     }])
@@ -38,7 +44,7 @@ def test_weather_schema_rejects_impossible_temp():
 
 def test_weather_schema_rejects_humidity_out_of_range():
     df = pd.DataFrame([{
-        "region_name": "Iowa", "date": "2026-08-01",
+        "region_name": "Nashik", "date": "2026-09-01",
         "temp_max_c": 30.0, "temp_min_c": 18.0,
         "precipitation_mm": 2.5, "humidity_pct": 130.0,  # invalid: >100%
         "windspeed_max_kmh": 12.0,
@@ -47,33 +53,54 @@ def test_weather_schema_rejects_humidity_out_of_range():
     assert err is not None
 
 
-def test_ag_exports_schema_accepts_valid_row():
+def test_geo_india_schema_accepts_valid_row():
     df = pd.DataFrame([{
-        "state_code": "IA", "state_name": "Iowa",
-        "total_exports_musd": 11273.76, "corn_musd": 2529.8,
-        "wheat_musd": 3.1, "cotton_musd": 0.0, "dairy_musd": 107.0,
+        "region_name": "Nashik", "state_ut": "Maharashtra",
+        "state_code": "MH", "district": "Nashik", "mandi_apmc": "Nashik",
+        "latitude": 19.9975, "longitude": 73.7898,
     }])
-    clean, err = validate_or_report(df, ag_exports_schema, "ag_exports")
+    clean, err = validate_or_report(df, geo_india_schema, "geo")
     assert err is None
+    assert len(clean) == 1
 
 
-def test_ag_exports_schema_rejects_bad_state_code():
+def test_geo_india_schema_rejects_bad_state_code_length():
     df = pd.DataFrame([{
-        "state_code": "IOWA", "state_name": "Iowa",  # invalid: not 2 chars
-        "total_exports_musd": 11273.76, "corn_musd": 2529.8,
-        "wheat_musd": 3.1, "cotton_musd": 0.0, "dairy_musd": 107.0,
+        "region_name": "Nashik", "state_ut": "Maharashtra",
+        "state_code": "MHX", "district": "Nashik", "mandi_apmc": "Nashik",
+        "latitude": 19.9975, "longitude": 73.7898,
     }])
-    clean, err = validate_or_report(df, ag_exports_schema, "ag_exports")
+    clean, err = validate_or_report(df, geo_india_schema, "geo")
     assert err is not None
 
 
-def test_geo_schema_rejects_invalid_latitude():
+def test_geo_india_schema_rejects_out_of_bounds_latitude():
     df = pd.DataFrame([{
-        "state_name": "Iowa", "capital": "Des Moines",
-        "latitude": 999.0,  # invalid: out of range
-        "longitude": -93.6,
+        "region_name": "Nashik", "state_ut": "Maharashtra",
+        "state_code": "MH", "district": "Nashik", "mandi_apmc": "Nashik",
+        "latitude": 999.0, "longitude": 73.7898,  # invalid: outside India bounds
     }])
-    clean, err = validate_or_report(df, geo_schema, "geo")
+    clean, err = validate_or_report(df, geo_india_schema, "geo")
+    assert err is not None
+
+
+def test_market_schema_accepts_valid_row():
+    df = pd.DataFrame([{
+        "commodity": "Wheat", "variety": "Lokwan", "state_ut": "Maharashtra",
+        "district": "Nashik", "mandi": "Nashik", "date": "2026-09-01",
+        "market_price_inr_per_quintal": 2450.0, "arrivals_quintal": 1200.0,
+    }])
+    clean, err = validate_or_report(df, market_commodity_schema, "market")
+    assert err is None
+
+
+def test_market_schema_rejects_negative_price():
+    df = pd.DataFrame([{
+        "commodity": "Wheat", "variety": "Lokwan", "state_ut": "Maharashtra",
+        "district": "Nashik", "mandi": "Nashik", "date": "2026-09-01",
+        "market_price_inr_per_quintal": -10.0, "arrivals_quintal": 1200.0,
+    }])
+    clean, err = validate_or_report(df, market_commodity_schema, "market")
     assert err is not None
 
 

@@ -1,0 +1,114 @@
+{
+  "checked_at_utc": "2026-09-18T06:40:01.709024+00:00",
+  "country": "india",
+  "status": "PASS",
+  "issues": [],
+  "market_source": {
+    "status": "not_configured",
+    "note": "Market prices/arrivals are produced ONLY by an official e-NAM / AGMARKNET loader once integrated. No market values are fabricated."
+  },
+  "india": {
+    "artifact_checks": [
+      {
+        "check": "duplicates",
+        "dataset": "india_mandi",
+        "status": "PASS",
+        "detail": "no duplicate trade-day rows"
+      },
+      {
+        "check": "duplicates",
+        "dataset": "india_agriculture",
+        "status": "PASS",
+        "detail": "no season-aware duplicate rows"
+      },
+      {
+        "check": "duplicates",
+        "dataset": "india_region_features",
+        "status": "PASS",
+        "detail": "no duplicate (region_name, date) rows"
+      },
+      {
+        "check": "duplicates",
+        "dataset": "india_crop_summary",
+        "status": "PASS",
+        "detail": "no duplicate (state, district, crop) rows"
+      },
+      {
+        "check": "missing_geo",
+        "dataset": "india_region_features",
+        "status": "PASS",
+        "detail": "no empty state/district"
+      },
+      {
+        "check": "missing_geo",
+        "dataset": "india_crop_summary",
+        "status": "PASS",
+        "detail": "no empty state/district"
+      },
+      {
+        "check": "missing_geo",
+        "dataset": "india_crop_summary",
+        "status": "PASS",
+        "detail": "25742/26129 crop rows without a monitored district (expected: weather/market blocks only exist for monitored districts)"
+      },
+      {
+        "check": "impossible_values",
+        "dataset": "india_region_features",
+        "status": "PASS",
+        "detail": "no impossible values"
+      },
+      {
+        "check": "impossible_values",
+        "dataset": "india_crop_summary",
+        "status": "PASS",
+        "detail": "no impossible values"
+      },
+      {
+        "check": "missing_prices",
+        "dataset": "india_mandi",
+        "status": "PASS",
+        "detail": "price channel present"
+      },
+      {
+        "check": "missing_weather",
+        "dataset": "india_region_features",
+        "status": "PASS",
+        "detail": "weather-window rows carry complete temperature/humidity"
+      },
+      {
+        "check": "staleness",
+        "dataset": "india_region_features",
+        "status": "PASS",
+        "detail": "india_region_features manifest refreshed 0.0h ago"
+      },
+      {
+        "check": "staleness",
+        "dataset": "india_crop_summary",
+        "status": "PASS",
+        "detail": "india_crop_summary manifest refreshed 0.0h ago"
+      },
+      {
+        "check": "staleness",
+        "dataset": "india_market_summary",
+        "status": "PASS",
+        "detail": "india_market_summary manifest refreshed 0.0h ago"
+      }
+    ],
+    "observed": {
+      "india_mandi_rows": 54710,
+      "india_mandi_duplicates": 0,
+      "india_agriculture_rows": 455359,
+      "india_agriculture_duplicates": 0,
+      "region_features_rows": 963,
+      "crop_summary_rows": 26129,
+      "crop_summary_districts_not_in_geo": 25742,
+      "india_mandi_null_modal": 0,
+      "region_market_days": 593,
+      "india_region_features_last_data": [
+        "2026-04-01",
+        "2026-09-24"
+      ],
+      "india_market_summary_last_data": "2026-05-31"
+    }
+  }
+}

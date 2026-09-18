@@ -1,0 +1,137 @@
+{
+  "_comment": "AgriPulse India data catalog -- factual source registry.",
+  "active_country": "india",
+  "sources": [
+    {
+      "id": "weather-open-meteo",
+      "name": "Open-Meteo",
+      "url": "https://api.open-meteo.com",
+      "kind": "live-api",
+      "payload": "Daily climate variables (temperature_2m_max/min, precipitation_sum, relative_humidity_2m_mean, windspeed_10m_max) for monitored Indian districts (catalog/india_regions.json)",
+      "coverage": "10 monitored districts; 30 observed + 7 forecast days per run",
+      "units": "temperature °C, precipitation mm, humidity %, wind km/h",
+      "status": "integrated"
+    },
+    {
+      "id": "geography-india-reference",
+      "name": "Monitored-district reference (India > State/UT > District > Mandi/APMC)",
+      "url": "catalog/india_regions.json",
+      "kind": "static-reference",
+      "payload": "10 monitored districts with ISO 3166-2:IN State/UT codes, LGD (Local Government Directory) district codes, mandi/APMC names and approximate coordinate anchors",
+      "units": "geographic coordinates (degrees)",
+      "status": "integrated",
+      "refinement": "Coordinates are approximate reference points; production should refine against an official gazetteer / boundary service. Mandi/APMC names only -- codes are withheld until verified against an e-NAM / AGMARKNET mandi master."
+    },
+    {
+      "id": "lgd-district-codes",
+      "name": "Local Government Directory (LGD) district codes",
+      "url": "https://data.gov.in/catalog/local-government-directory-lgd",
+      "kind": "official-dataset",
+      "payload": "Current LGD district codes (Ministry of Panchayati Raj) used as district_code values; monthly refresh on the OGD platform",
+      "units": "n/a (administrative codes)",
+      "status": "integrated",
+      "note": "Authoritative district-code source. Older state-portal copies (e.g. Coimbatore 523) use superseded numbering and are not used."
+    },
+    {
+      "id": "commodity-reference",
+      "name": "Indian commodity/crop metadata",
+      "url": "catalog/india/commodities.json",
+      "kind": "static-reference",
+      "payload": "Common Indian commodities by category (cereals, pulses, oilseeds, commercial, horticulture, sugarcane). Metadata only -- no prices.",
+      "units": "n/a (no prices)",
+      "status": "integrated"
+    },
+    {
+      "id": "market-e-nam",
+      "name": "e-NAM (National Agriculture Market)",
+      "url": "https://enam.gov.in",
+      "kind": "official-live",
+      "payload": "Mandi-level commodity prices and arrivals (INR per quintal)",
+      "units": "INR per quintal (100 kg); arrivals in quintals",
+      "status": "not_configured",
+      "note": "Live feed extension point (src/ingestion/india_market_source.py). e-NAM publishes no public documented REST API and its portal is not scraped; the market-price forecast stays gated until a live feed is configured. No market forecast values are fabricated."
+    },
+    {
+      "id": "market-agmarknet-daily-apmc",
+      "name": "AGMARKNET daily APMC price & arrival records (via India Data Portal)",
+      "url": "https://ckan.indiadataportal.com/dataset/1749d812-35b4-4635-ac29-dd3116ed31b0",
+      "kind": "official-dataset",
+      "payload": "Daily wholesale APMC mandi prices (min/modal/max) and arrival quantities for agricultural commodities, sourced from AGMARKNET (Directorate of Marketing & Inspection, MoAFW) and exposed as a structured CKAN resource on the India Data Portal",
+      "units": "price_unit: Rs./Quintal, Rs./Unit, Rs./Bundle; arrival_units: Metric Tonnes, Bundle, Nos",
+      "status": "integrated",
+      "note": "Ingested by src/ingestion/india_mandi.py via the IDP datastore_search structured endpoint (resource 13f9964a-9398-4d49-a7b8-2f57c2396c48; GODL-India). Real attributed records labelled with source/last-updated/period; missing values stay null; no traded quantity is synthesized. This build commits the monitored-district bounded subset under data/india/demo/."
+    },
+    {
+      "id": "open-government-data-india",
+      "name": "Open Government Data Platform (India)",
+      "url": "https://data.gov.in/catalog/current-daily-price-various-commodities-various-markets-mandi",
+      "kind": "official-catalog",
+      "payload": "OGD catalog page for the current daily price of various commodities in various markets/mandis (AGMARKNET), plus other agriculture datasets",
+      "units": "varies",
+      "status": "integrated-reference",
+      "note": "Attributes the AGMARKNET daily mandi price/arrival catalog; the India Data Portal structured resource listed above is the machine-readable source this product actually reads (data.gov.in file host is not reliably reachable from all sandboxes)."
+    },
+    {
+      "id": "imd",
+      "name": "India Meteorological Department (IMD) API",
+      "url": "https://api.imd.gov.in/public/api_reference.html",
+      "kind": "official-live",
+      "payload": "Current weather (current_wx), 7-day city forecast (cityforecast), district-wise rainfall (districtrainfall) and district-wise warnings (districtwarning) via the official IMD API portal",
+      "units": "temperature °C, rainfall mm, wind km/h, humidity %",
+      "status": "integrated",
+      "note": "Ingestion is src/ingestion/imd_weather.py. Live access needs registered, IP-bound credentials via env AGRIPULSE_IMD_API_KEY + AGRIPULSE_IMD_TOKEN; without them the module reports not_configured and never fabricates data. Sandbox fixtures (india_weather_fixture_generator.py) are clearly labelled is_fixture=true."
+    },
+    {
+      "id": "des-crop-apy",
+      "name": "DE&S / MoAFW crop Area-Production-Yield (India agricultural production)",
+      "url": "https://data.gov.in/catalog/district-wise-season-wise-crop-production-statistics-0",
+      "kind": "official-dataset",
+      "payload": "District-wise, season-wise (Kharif/Rabi/Summer/Autumn/Winter/Whole Year/Total) crop production statistics since 1997 by State/UT > District > Crop: area (Hectare), production (Tonnes), yield (Tonnes/Hectare). From the Directorate of Economics & Statistics, Ministry of Agriculture & Farmers Welfare (GODL-India).",
+      "units": "area Hectare, production Tonnes, yield Tonnes/Hectare",
+      "status": "integrated",
+      "note": "Ingestion is src/ingestion/india_agriculture.py (Bronze -> Silver -> india_agriculture.parquet). data.gov.in file host is unreachable on some sandboxes; the same GODL dataset is then acquired via the India Data Portal CKAN resource (see module DEFAULT_SOURCE_URL) or a local copy via AGRIPULSE_AGRICULTURE_FILE. district_code is the DE&S code (not LGD). Missing production values from the source are preserved as null -- never fabricated. Crop names are canonicalized 1:1 via catalog/india_crops.json (similar-looking crops are never merged)."
+    }
+  ],
+  "gold_lineage": [
+    {
+      "id": "india_region_features",
+      "title": "India region x date features (weather + observed market block)",
+      "source": "Open-Meteo weather + AGMARKNET daily APMC records (via India Data Portal) + catalog/india_regions.json location mapping",
+      "input": ["data/india/silver/weather.parquet", "data/india/silver/india_mandi.parquet", "data/india/silver/geo.parquet"],
+      "output": ["data/india/gold/india_region_features/india_region_features.parquet", "data/india/gold/india_region_features/manifest.json"],
+      "schema": ["region_name", "state", "state_code", "district", "date", "temp_max_c", "temp_min_c", "temp_avg_c", "precipitation_mm", "humidity_pct", "windspeed_max_kmh", "median_modal_price_rq", "n_price_records", "n_price_markets", "n_price_commodities", "total_arrival_tonnes", "n_arrival_records", "n_arrival_markets"],
+      "producer": "src/transform/india_silver_to_gold.py",
+      "generated_at": "runtime -- refreshed every pipeline run in data/india/catalog/gold_lineage.json"
+    },
+    {
+      "id": "india_market_summary",
+      "title": "India market/commodity/variety price & arrival summary (AGMARKNET)",
+      "source": "AGMARKNET daily APMC records (via India Data Portal)",
+      "input": ["data/india/silver/india_mandi.parquet"],
+      "output": ["data/india/gold/india_market_summary/india_market_summary.parquet", "data/india/gold/india_market_summary/state_market_summary.parquet", "data/india/gold/india_market_summary/manifest.json"],
+      "schema": ["state", "district", "apmc", "commodity", "variety", "price_unit", "latest_date", "days_of_history", "latest_min_price", "latest_modal_price", "latest_max_price", "latest_arrival_quantity", "avg_modal_price_7d", "avg_arrival_quantity_7d", "modal_price_change_pct_7d", "arrival_change_pct_7d", "arrival_units", "state_latest_modal_price", "modal_pct_vs_state_latest"],
+      "producer": "src/transform/india_silver_to_gold.py (reuses src/transform/mandi_to_gold.py as the single source of truth)",
+      "generated_at": "runtime -- refreshed every pipeline run in data/india/catalog/gold_lineage.json"
+    },
+    {
+      "id": "india_crop_summary",
+      "title": "India Location + Crop (+ Date/Year) integrated crop summary",
+      "source": "DE&S/MoAFW Area-Production-Yield + AGMARKNET daily APMC + Open-Meteo weather (monitored districts)",
+      "input": ["data/india/silver/india_agriculture.parquet", "data/india/silver/india_mandi.parquet", "data/india/gold/india_region_features/india_region_features.parquet"],
+      "output": ["data/india/gold/india_crop_summary/india_crop_summary.parquet", "data/india/gold/india_crop_summary/india_crop_year.parquet", "data/india/gold/india_crop_summary/manifest.json"],
+      "schema": ["state", "district", "crop", "crop_type", "state_code", "district_code", "n_year_season_rows", "years_observed", "first_year", "last_year", "latest_year", "latest_season", "latest_area_ha", "latest_production_t", "latest_yield_t_per_ha", "total_area_ha", "total_production_t", "market_status", "matched_commodity", "n_market_records", "n_markets", "latest_market_date", "latest_modal_price", "latest_min_price", "latest_max_price", "avg_modal_price_7d", "modal_price_change_pct_7d", "weather_status", "obs_temp_max_c", "obs_temp_min_c", "obs_precip_mm", "obs_humidity_pct", "weather_warning"],
+      "producer": "src/transform/india_silver_to_gold.py",
+      "generated_at": "runtime -- refreshed every pipeline run in data/india/catalog/gold_lineage.json"
+    },
+    {
+      "id": "india_forecasts",
+      "title": "India crop-production forecast (one-year-ahead 2023-2024, prototype)",
+      "source": "DE&S/MoAFW Area-Production-Yield (via Gold india_crop_year panel)",
+      "input": ["data/india/gold/india_crop_summary/india_crop_year.parquet"],
+      "output": ["data/india/gold/india_forecasts.parquet", "data/india/catalog/india_model_report.json"],
+      "schema": ["state", "district", "crop", "season", "forecast_year", "latest_observed_year", "observed_last_tonnes", "forecast_production_tonnes", "forecast_lower_tonnes", "forecast_upper_tonnes", "model_used"],
+      "producer": "src/ml/india_forecast.py (strict temporal split; gradient boosting vs naive persistence, selected on validation; prototype status always declared)",
+      "generated_at": "runtime -- refreshed every pipeline run; methodology/metrics/limitations in data/india/catalog/india_model_report.json"
+    }
+  ]
+}

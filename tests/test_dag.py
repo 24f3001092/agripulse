@@ -31,6 +31,8 @@ EXPECTED_TASKS = {
     "ingest_geo",
     "bronze_to_silver",
     "silver_to_gold",
+    "india_gold_summary",
+    "india_forecast",
     "monitor_pipeline_health",
     "prediction_pipeline",
 }
@@ -139,7 +141,9 @@ def test_dag_dependency_chain(dag_module):
     ingest = {"ingest_weather", "ingest_market", "ingest_geo"}
     assert ops["bronze_to_silver"].upstream_task_ids == ingest
     assert ops["silver_to_gold"].upstream_task_ids == {"bronze_to_silver"}
-    assert ops["monitor_pipeline_health"].upstream_task_ids == {"silver_to_gold"}
+    assert ops["india_gold_summary"].upstream_task_ids == {"bronze_to_silver"}
+    assert ops["india_forecast"].upstream_task_ids == {"india_gold_summary"}
+    assert ops["monitor_pipeline_health"].upstream_task_ids == {"silver_to_gold", "india_forecast"}
     assert ops["prediction_pipeline"].upstream_task_ids == {"monitor_pipeline_health"}
 
 
@@ -149,6 +153,8 @@ def test_dag_bash_commands_point_at_real_modules(dag_module):
         "ingest_weather": "src/ingestion/weather_api.py",
         "bronze_to_silver": "src/transform/bronze_to_silver.py",
         "silver_to_gold": "src/transform/silver_to_gold.py",
+        "india_gold_summary": "src/transform/india_silver_to_gold.py",
+        "india_forecast": "src/ml/india_forecast.py",
         "monitor_pipeline_health": "src/quality/monitor.py",
         "prediction_pipeline": "src/ml/prediction_pipeline.py",
     }

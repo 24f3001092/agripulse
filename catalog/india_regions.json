@@ -1,0 +1,66 @@
+{
+  "_comment": "AgriPulse India location catalog. Canonical, reusable State/UT > District > Mandi/APMC reference for the monitored districts. Every district is a REAL administrative district and every code below is either an ISO 3166-2:IN state code or an LGD (Local Government Directory) district code -- nothing is invented. Mandi/APMC NAMES are carried from the factual reference that anchors weather pulls; mandi/APMC CODES are deliberately omitted until they are verified against an official e-NAM / AGMARKNET mandi master. Coordinates are approximate district/mandi reference coordinates (public geographic reference) used as weather-API anchors; production should refine them against an official gazetteer / boundary service.",
+  "_meta": {
+    "country": "India",
+    "geography_levels": ["country", "state", "district", "mandi"],
+    "state_code_standard": "ISO 3166-2:IN",
+    "state_code_note": "2-letter ISO state/UT codes used throughout the pipeline (MH, PB, UP, HR, MP, GJ, TN, TS, KA, WB).",
+    "district_code_standard": "LGD district code (Local Government Directory, Ministry of Panchayati Raj, Government of India)",
+    "district_code_note": "Current LGD numbering as published on the Open Government Data (OGD) 'District LGD codes' resource, cross-checked against LGDirectory references. Example: Coimbatore LGD 569 (confirmed via LGDirectory entry on Wikidata, 2026); older state-portal copies that still list Coimbatore as 523 use a superseded numbering and are NOT used here.",
+    "mandi_code_status": "NOT ASSIGNED",
+    "mandi_code_note": "No mandi/APMC code is assigned to any record: an official e-NAM / AGMARKNET mandi master has not been verified, and this catalog never invents codes. The `mandi` and `apmc` fields carry factual market names only.",
+    "sources": [
+      {
+        "id": "lgd-portal",
+        "name": "Local Government Directory (LGD), Government of India",
+        "url": "https://lgdirectory.gov.in/",
+        "kind": "official",
+        "note": "Authoritative directory of districts and their codes. Land-region hierarchy: State/UT > District > Sub-district > Village."
+      },
+      {
+        "id": "ogd-district-lgd-codes",
+        "name": "Open Government Data (data.gov.in) -- District LGD codes resource",
+        "url": "https://data.gov.in/catalog/local-government-directory-lgd",
+        "kind": "official-dataset",
+        "note": "CSV of 766 district records with LGD codes plus census 2001/2011 district codes as cross-reference; monthly refresh of the LGD master. Source of the district_code values in this catalog."
+      },
+      {
+        "id": "lgd-reference-coimbatore",
+        "name": "LGDirectory reference for Coimbatore district (LGD 569)",
+        "url": "https://www.wikidata.org/wiki/Q15136",
+        "kind": "official-reference",
+        "note": "Independent cross-check that the current LGD district code for Coimbatore is 569 (older portal copies listing 523 use a superseded numbering)."
+      },
+      {
+        "id": "iso-3166-2-in",
+        "name": "ISO 3166-2:IN state/UT codes",
+        "url": "https://en.wikipedia.org/wiki/ISO_3166-2:IN",
+        "kind": "standard",
+        "note": "Standard 2-letter state/UT codes used for state_code."
+      },
+      {
+        "id": "mandi-names-existing",
+        "name": "Existing factual monitored-district reference (mandi/APMC names)",
+        "url": "catalog/india_regions.json",
+        "kind": "internal-reference",
+        "note": "Carried the factual mandi/APMC names used as weather-API anchors; superseded by this canonical catalog."
+      }
+    ],
+    "notes": [
+      "region_name is the monitoring label used by the pipeline's weather/gold partition keys. It equals the district name for most records and differs only where the label is a well-known city alias of a named district: Kanpur Nagar -> 'Kanpur', Ranga Reddy -> 'Hyderabad', Bengaluru Urban -> 'Bengaluru'.",
+      "Coordinates remain approximate district/mandi anchors for the Open-Meteo pull (see data_catalog 'geography-india-reference')."
+    ]
+  },
+  "regions": [
+    {"region_name": "Nashik",     "state": "Maharashtra",   "state_code": "MH", "district": "Nashik",        "district_code": "487", "latitude": 19.9975, "longitude": 73.7898, "mandi": "Nashik",       "apmc": "Nashik"},
+    {"region_name": "Ludhiana",   "state": "Punjab",        "state_code": "PB", "district": "Ludhiana",      "district_code": "36",  "latitude": 30.9010, "longitude": 75.8573, "mandi": "Ludhiana",     "apmc": "Ludhiana"},
+    {"region_name": "Kanpur",     "state": "Uttar Pradesh", "state_code": "UP", "district": "Kanpur Nagar",  "district_code": "157", "latitude": 26.4499, "longitude": 80.3319, "mandi": "Kanpur",       "apmc": "Kanpur"},
+    {"region_name": "Karnal",     "state": "Haryana",       "state_code": "HR", "district": "Karnal",        "district_code": "67",  "latitude": 29.6857, "longitude": 76.9905, "mandi": "Karnal",       "apmc": "Karnal"},
+    {"region_name": "Indore",     "state": "Madhya Pradesh","state_code": "MP", "district": "Indore",        "district_code": "410", "latitude": 22.7196, "longitude": 75.8577, "mandi": "Indore",       "apmc": "Indore"},
+    {"region_name": "Rajkot",     "state": "Gujarat",       "state_code": "GJ", "district": "Rajkot",        "district_code": "457", "latitude": 22.3039, "longitude": 70.8022, "mandi": "Rajkot",       "apmc": "Rajkot"},
+    {"region_name": "Coimbatore", "state": "Tamil Nadu",    "state_code": "TN", "district": "Coimbatore",    "district_code": "569", "latitude": 11.0168, "longitude": 76.9558, "mandi": "Coimbatore",   "apmc": "Coimbatore"},
+    {"region_name": "Hyderabad",  "state": "Telangana",     "state_code": "TS", "district": "Ranga Reddy",   "district_code": "518", "latitude": 17.4948, "longitude": 78.3692, "mandi": "Hyderabad",    "apmc": "Hyderabad"},
+    {"region_name": "Bengaluru",  "state": "Karnataka",     "state_code": "KA", "district": "Bengaluru Urban","district_code": "525","latitude": 13.0235, "longitude": 77.5467, "mandi": "Yeshwanthpur", "apmc": "Yeshwanthpur"},
+    {"region_name": "Kolkata",    "state": "West Bengal",   "state_code": "WB", "district": "Kolkata",       "district_code": "315", "latitude": 22.5726, "longitude": 88.3639, "mandi": "Kolkata",      "apmc": "Kolkata"}
+  ]
+}
