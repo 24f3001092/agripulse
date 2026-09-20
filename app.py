@@ -1,82 +1,8 @@
-"""
-app.py
+"""AgriPulse India - public agricultural intelligence & business scenario platform.
 
-AgriPulse India - public agricultural intelligence & business scenario platform
-(dashboard). Built on the existing, unchanged Bronze/Silver/Gold pipeline and
-ML outputs of the active country profile (India). This file ONLY presents
-repository-generated artifacts:
-
-    data/india/gold/region_daily_features    (gold region feature table)
-    data/india/gold/region_summary           (gold district-level summary)
-    data/india/gold/region_segments.parquet  (weather-exposure segments)
-    data/india/gold/india_market_summary/    (mandi gold summary + manifest)
-    data/india/gold/india_forecasts.parquet  (India crop-production forecast, prototype)
-    data/india/gold/india_crop_summary/      (crop summary + crop-year production panel)
-    data/india/silver/india_mandi.parquet    (AGMARKNET daily prices/arrivals)
-    data/india/catalog/health_report.json    (pipeline health)
-    data/india/catalog/ml_status.json        (forecast gate status -- honest)
-    data/india/catalog/model_report.json     (model report, only when live feed)
-    data/india/catalog/india_model_report.json (India production forecast report, prototype)
-    data/india/catalog/prediction_run.json   (ML run metadata)
-
-Every artifact is read from the locally generated path when present, otherwise
-def source_status_banner() -> None:
-    """Show live/cached/historical/demo status for data sources."""
-    import pathlib
-    
-    artifact_source_status = {}
-    
-    # Check required artifacts
-    for key in ["gold_daily", "gold_summary", "silver_mandi", "health", "ml_status"]:
-        if key in globals():
-            artifact = globals()[key]
-            if artifact is not None:
-                # Try to resolve
-                pass
-    
-    # Display status based on ARTIFACTS dict
-    for key in ["gold_daily", "gold_summary", "silver_mandi", "health", "ml_status", "model"]:
-        if key in ARTIFACTS:
-            live, demo = ARTIFACTS[key]
-            lp = pathlib.Path(live) if live else None
-            dp = pathlib.Path(demo) if demo else None
-            
-            if lp and lp.exists():
-                status = "Live"
-            elif dp and dp.exists():
-                status = "Demo"
-            else:
-                status = "Historical/Cached"
-            
-            artifact_source_status[key] = status
-    
-    if artifact_source_status:
-        cols = st.columns(min(3, len(artifact_source_status)))
-        for i, (key, status) in enumerate(artifact_source_status.items()):
-            with cols[i % len(cols)]:
-                color = "#2E7D32" if status == "Live" else "#F9A825" if status == "Demo" else "#6C757D"
-                st.markdown(f'<div style="border: 1px solid {color}; padding: 6px 10px; border-radius: 6; font-size: 0.8rem;">{key}: {status}</div>', unsafe_allow_html=True)
-from the tracked deployment copies under data/india/demo/ (see src/products/artifacts.py).
-
-No hard-coded numbers: every metric traces back to a generated file (or the
-tracked deployment copy), and missing files are reported instead of being
-silently replaced.
-
-India-specific honesty rules enforced here:
-  * Market data shown on "Market Intelligence" comes ONLY from the real,
-    attributed AGMARKNET daily wholesale records (importer
-    src/ingestion/india_mandi.py). It is labelled with data source, last data
-    date and data period. No values are fabricated, and no "buy/sell/guaranteed
-    profit" claims are made -- only observed prices/arrivals and analytical
-    signals.
-  * The market-price forecast is GATED: e-NAM live prices are not hooked up
-    (no public documented API; the portal is not scraped), so ml_status.json
-    reports model_status = not_generated and the Forecast page explains exactly
-    what the product needs instead of showing a made-up number.
-  * Scenario figures are user-assumption estimates, never profit guarantees.
-
-Run:
-    python -m streamlit run app.py
+This Streamlit dashboard presents repository-generated artifacts for India,
+including Gold-layer regional/crop features, market summaries, forecasts,
+segmentation, monitoring reports, and scenario analysis.
 """
 
 from __future__ import annotations
@@ -97,7 +23,35 @@ from products.artifacts import REQUIRED_ARTIFACTS, OPTIONAL_ARTIFACTS  # noqa: E
 from products.insights import build_region_insights, _tercile_label  # noqa: E402
 from products.scenario import estimate_scenario, run_sensitivity, compute_risk_indicators  # noqa: E402
 from config import format_inr, inr_compact, format_price_per_quintal  # noqa: E402
-from catalog.translations import load_translations, t  # noqa: E402
+# Translation helpers are intentionally kept local so the public app does not
+# depend on an optional catalog.translations module that may be absent from
+# a clean checkout. Navigation falls back to English keys safely.
+_TRANSLATIONS = {
+    "en": {
+        "navigation.home": "Home",
+        "navigation.my_region": "My Region",
+        "navigation.crop_intelligence": "Crop Intelligence",
+        "navigation.mandi_market": "Mandi Market",
+        "navigation.weather_risk": "Weather & Risk",
+        "navigation.forecast": "Forecast",
+        "navigation.opportunity_scanner": "Opportunity Scanner",
+        "navigation.scenario_planner": "Scenario Planner",
+        "navigation.data_health": "Data Health",
+        "navigation.sources_methodology": "Sources & Methodology",
+        "navigation.business_intelligence": "Business Intelligence",
+    },
+}
+
+def load_translations() -> dict:
+    """Return the built-in UI translations used by the dashboard."""
+    return _TRANSLATIONS
+
+
+def t(key: str, lang: str = "en") -> str:
+    """Translate a UI key, falling back to English and then the key itself."""
+    return _TRANSLATIONS.get(lang, {}).get(
+        key, _TRANSLATIONS["en"].get(key, key)
+    )
 
 DEMO = config.DEMO
 CATALOG_CFG = config.CATALOG_CFG
@@ -165,6 +119,7 @@ section[data-testid="stSidebar"] { border-right: 1px solid #e2e6dc; }
 }
 </style>
 """
+
 st.markdown(_CSS, unsafe_allow_html=True)
 
 
@@ -194,6 +149,7 @@ def resolve_artifact(key: str) -> tuple[Path, str] | None:
         _ARTIFACT_SOURCE[key] = "demo"
         return demo, "demo"
     _ARTIFACT_SOURCE[key] = "missing"
+
     return None
 
 
@@ -522,9 +478,9 @@ def page_home() -> None:
 
 
 def page_my_district() -> None:
-    st.header("My District")
+    st.header("My Region")
     st.caption(
-        "A public-friendly view of one monitored district: location (State/UT > District > "
+        "A public-friendly view of one monitored region/district: location (State/UT > District > "
         "Mandi/APMC), weather profile, weather-exposure segment, data freshness and forecast "
         "availability — all from observed Gold-layer data."
     )
@@ -638,163 +594,8 @@ def page_my_district() -> None:
     st.divider()
 
 def page_my_region() -> None:
-    ml_status = load_ml_status()
-    """Profile for a selected State > District > Mandi region."""
-    st.header("My Region")
-    st.caption("Agricultural, weather and market profile for a selected region.")
-
-    daily = load_gold_daily()
-    summary = load_summary()
-    mandi = load_mandi()
-    segments = load_segments()
-    forecast = load_forecast()
-
-    # --- Location selector (State > District > Mandi) ---
-    st.subheader("Location")
-    geo = load_geo()
-    if geo is None:
-        st.error("Gold geo data not available.")
-        return
-
-    states = sorted(geo["state_ut"].unique())
-    state = st.selectbox("State / UT", states, key="region_state")
-
-    if state:
-        districts = sorted(geo[geo["state_ut"] == state]["region_name"].unique())
-        district = st.selectbox("District", districts, key="region_district")
-    else:
-        district = ""
-
-    # Mandi selection
-    mandi_options = [""]  # empty = district-level only
-    if mandi is not None and not mandi.empty:
-        mandi_options = sorted(mandi["apmc"].unique().tolist()) + ["District-level only"]
-    mandi_sel = st.selectbox("Mandi / APMC", mandi_options, key="region_mandi")
-
-    # Show selected location
-    if state and district:
-        location_path = f"{state} > {district}"
-        if mandi_sel and mandi_sel != "District-level only":
-            location_path = f"{location_path} > {mandi_sel}"
-        st.caption(f"Selected: **{location_path}**")
-
-    st.divider()
-
-    # --- Agricultural profile ---
-    st.subheader("Agricultural profile")
-    if summary is not None and state and district:
-        agg = summary[(summary["state_ut"] == state) & (summary["district"] == district)]
-        if not agg.empty:
-            row = agg.iloc[0]
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Average temp (°C)", f"{row.get('avg_temp_c', ''):.1f}" if pd.notna(row.get("avg_temp_c")) else "N/A")
-            c2.metric("Total precipitation (mm)", f"{row.get('total_precip_mm', ''):.0f}" if pd.notna(row.get("total_precip_mm")) else "N/A")
-            c3.metric("Yield (q/ha)", f"{row.get('yield', ''):.1f}" if pd.notna(row.get("yield")) else "N/A")
-        else:
-            st.info("No agricultural summary data for this district.")
-
-    # --- Weather profile ---
-    st.subheader("Weather profile")
-    if daily is not None and state and district:
-        dw = daily[(daily["state_ut"] == state) & (daily["region_name"] == district)]
-        if not dw.empty:
-            row = dw.iloc[-1]
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Temperature (°C)", f"{row.get('temp_avg_c', ''):.1f}" if pd.notna(row.get("temp_avg_c")) else "N/A")
-            c2.metric("Precipitation (mm)", f"{row.get('precipitation_mm', ''):.1f}" if pd.notna(row.get("precipitation_mm")) else "N/A")
-            c3.metric("Humidity (%)", f"{row.get('humidity_pct', ''):.0f}" if pd.notna(row.get("humidity_pct")) else "N/A")
-            fig = px.line(dw, x="date", y="temp_avg_c", title=f"Temperature trend - {district}")
-            style_fig(fig, height=250)
-            st.plotly_chart(fig, width="stretch")
-        else:
-            st.info("No daily weather data for this district.")
-
-    # --- Market profile ---
-    st.subheader("Market profile")
-    if mandi is not None and state and district and mandi_sel:
-        m = mandi[(mandi["state"] == state) & (mandi["district"] == district) & (mandi["apmc"] == mandi_sel)]
-        if not m.empty:
-            latest = m.sort_values("latest_date").iloc[-1]
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Modal price (₹/quintal)", f"{latest.get('latest_modal_price', ''):.0f}" if pd.notna(latest.get('latest_modal_price')) else "N/A")
-            c2.metric("Min price (₹/quintal)", f"{latest.get('latest_min_price', ''):.0f}" if pd.notna(latest.get('latest_min_price')) else "N/A")
-            c3.metric("Max price (₹/quintal)", f"{latest.get('latest_max_price', ''):.0f}" if pd.notna(latest.get('latest_max_price')) else "N/A")
-            st.caption(f"Arrivals: {latest.get('latest_arrival_quantity', ''):.1f} {latest.get('arrival_units', '')}" if pd.notna(latest.get('latest_arrival_quantity')) else "")
-            if latest.get("modal_price_change_pct_7d") is not None:
-                st.caption(f"Price change 7d: {latest.get('modal_price_change_pct_7d'):.1f}%")
-        else:
-            st.info("No mandi data for this state/district/mandi combination.")
-
-# --- Crop profile ---
-    st.subheader("Crop profile")
-    if summary is not None and state and district:
-        dc = summary[(summary["state_ut"] == state) & (summary["district"] == district)]
-        if not dc.empty:
-            st.caption(f"Data entries for {district}: {len(dc)}")
-
-
-# ---- Market & forecast availability ------------------------------------
-    st.subheader("Market & forecast availability")
-    if config.market_source_status() != "configured":
-        st.markdown(f'<div class="app-warning">{market_status_banner()}</div>', unsafe_allow_html=True)
-    else:
-        st.success("Market feed (e-NAM / AGMARKNET) is configured.")
-
-
-
-    if ml_status and ml_status.get("model_status") == "not_generated":
-        c3.metric("Market-price forecast", "Not generated (market feed pending)")
-    elif forecast is not None and not forecast.empty:
-        fc_row = forecast[forecast["region_name"] == region]
-        if not fc_row.empty:
-            actual = float(fc_row.iloc[0]["actual_signal_inr_per_quintal"])
-            predicted = float(fc_row.iloc[0]["predicted_signal_inr_per_quintal"])
-            c3.metric("Model-based price signal", format_price_per_quintal(predicted),
-                      delta=f"{predicted - actual:+,.0f} vs observed")
-        else:
-            c3.metric("Model-based price signal", "not available")
-    else:
-        c3.metric("Market-price forecast", "Not generated")
-
-    st.divider()
-
-    # ---- Data freshness ----------------------------------------------------
-    st.subheader("Data freshness & status")
-    f1, f2, f3 = st.columns(3)
-    f1.metric("Weather window", f"{region_daily['date'].min().date()} → {region_daily['date'].max().date()}",
-              help="Observed trailing window plus up to 7 forecast-ahead days from the latest Open-Meteo pull.")
-    f2.metric("Latest weather ingestion", str((meta or {}).get("ingested_at_utc") or "n/a"))
-    f3.metric("Health report", str((health or {}).get("checked_at_utc") or "n/a") + "  " +
-              str((health or {}).get("status") or ""))
-
-    st.divider()
-
-    # ---- Explainable insights ----------------------------------------------
-    st.subheader("Insights")
-    segments_empty = segments if isinstance(segments, pd.DataFrame) and not segments.empty else pd.DataFrame(
-        columns=["region_name", "segment", "segment_reason", "exposure_tier", "dominant_factor"]
-    )
-    forecast_empty = forecast if isinstance(forecast, pd.DataFrame) and not forecast.empty else pd.DataFrame(
-        columns=["region_name", "actual_signal_inr_per_quintal", "predicted_signal_inr_per_quintal"]
-    )
-    insights = build_region_insights(daily, summary, segments_empty, forecast_empty, region)
-    if insights:
-        render_insight_cards(insights)
-    else:
-        st.info("No insights could be computed for this district from the available data.")
-
-    st.divider()
-    st.subheader("Daily detail")
-    st.caption("Raw daily weather measurements for the selected district.")
-    st.dataframe(
-        region_daily[
-            ["date", "temp_max_c", "temp_min_c", "temp_avg_c", "precipitation_mm",
-             "humidity_pct", "windspeed_max_kmh"]
-        ].sort_values("date"),
-        width="stretch",
-    )
-
-
+    """Public region profile using the validated district/mandi workflow."""
+    page_my_district()
 def _split_weather_window(
     region_daily: pd.DataFrame, meta: dict | None
 ) -> tuple[pd.DataFrame, pd.DataFrame | None]:
@@ -1862,6 +1663,21 @@ def page_sources() -> None:
 # --------------------------------------------------------------------------- #
 # Navigation
 # --------------------------------------------------------------------------- #
+
+
+def page_crop_intelligence() -> None:
+    """Crop production intelligence and one-year-ahead prototype forecast."""
+    page_india_forecast()
+
+
+def page_mandi_market() -> None:
+    """Observed mandi market intelligence."""
+    page_mandi_intelligence()
+
+
+def page_weather_risk() -> None:
+    """Cross-district weather and exposure intelligence."""
+    page_market_intelligence()
 NAV_ITEMS = [
     t("navigation.home"),
     t("navigation.my_region"),
@@ -1946,10 +1762,8 @@ def page_business_intelligence() -> None:
     - Does not claim guaranteed profit
     - Uses: "Observed market signal", "Scenario", "Indicator"
 
-    Exportable Report:
-    - Contains: region, crop, market, weather, forecast, scenario inputs/outputs
-    - Sources and limitations noted
     """
+    # Exportable report content is included in the Business Intelligence page below.
     st.header("Business Intelligence")
     st.caption("Business-oriented dashboard for agricultural decision support")
 
