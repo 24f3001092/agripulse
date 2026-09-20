@@ -1,0 +1,127 @@
+{
+  "country": "india",
+  "layer": "gold",
+  "feature_set": [
+    "state",
+    "district",
+    "mandi",
+    "crop",
+    "season",
+    "year",
+    "production",
+    "area",
+    "yield",
+    "price_min",
+    "price_modal",
+    "price_max",
+    "arrival",
+    "temperature",
+    "rainfall",
+    "humidity",
+    "weather_warning"
+  ],
+  "generated_at": "2026-09-18T06:39:58.734799+00:00",
+  "outputs": [
+    {
+      "id": "india_region_features",
+      "title": "India region x date features (weather + observed market block)",
+      "source": "Open-Meteo daily weather for monitored India districts (GODL context) + AGMARKNET daily APMC price/arrival records via the India Data Portal -- GODL-India; location mapping from catalog/india_regions.json",
+      "input": [
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\silver\\weather.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\silver\\india_mandi.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\silver\\geo.parquet"
+      ],
+      "output": [
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_region_features\\india_region_features.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_region_features\\manifest.json"
+      ],
+      "schema": [
+        "region_name",
+        "state",
+        "state_code",
+        "district",
+        "date",
+        "temp_max_c",
+        "temp_min_c",
+        "temp_avg_c",
+        "precipitation_mm",
+        "humidity_pct",
+        "windspeed_max_kmh",
+        "median_modal_price_rq",
+        "n_price_records",
+        "n_price_markets",
+        "n_price_commodities",
+        "total_arrival_tonnes",
+        "n_arrival_records",
+        "n_arrival_markets"
+      ],
+      "status": "success",
+      "generated_at": "2026-09-18T06:39:17.437426+00:00",
+      "manifest": "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_region_features\\manifest.json"
+    },
+    {
+      "id": "india_market_summary",
+      "title": "India market/commodity/variety price & arrival summary",
+      "source": "AGMARKNET (Directorate of Marketing & Inspection, MoAFW) daily APMC price & arrival records via the India Data Portal -- GODL-India",
+      "input": null,
+      "output": null,
+      "schema": null,
+      "status": "success",
+      "generated_at": "2026-09-18T06:39:21.670071+00:00",
+      "manifest": "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_market_summary\\manifest.json"
+    },
+    {
+      "id": "india_crop_summary",
+      "title": "India Location + Crop (+ Date/Year) integrated crop summary",
+      "source": "DE&S/MoAFW crop Area-Production-Yield (GODL-India) + AGMARKNET daily APMC price/arrival records via the India Data Portal (GODL-India) + Open-Meteo daily weather for monitored districts",
+      "input": [
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\silver\\india_agriculture.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\silver\\india_mandi.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_region_features\\india_region_features.parquet"
+      ],
+      "output": [
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_crop_summary\\india_crop_summary.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_crop_summary\\india_crop_year.parquet",
+        "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_crop_summary\\manifest.json"
+      ],
+      "schema": [
+        "state",
+        "district",
+        "crop",
+        "crop_type",
+        "state_code",
+        "district_code",
+        "n_year_season_rows",
+        "years_observed",
+        "first_year",
+        "last_year",
+        "latest_year",
+        "latest_season",
+        "latest_area_ha",
+        "latest_production_t",
+        "latest_yield_t_per_ha",
+        "total_area_ha",
+        "total_production_t",
+        "market_status",
+        "matched_commodity",
+        "n_market_records",
+        "n_markets",
+        "latest_market_date",
+        "latest_modal_price",
+        "latest_min_price",
+        "latest_max_price",
+        "avg_modal_price_7d",
+        "modal_price_change_pct_7d",
+        "weather_status",
+        "obs_temp_max_c",
+        "obs_temp_min_c",
+        "obs_precip_mm",
+        "obs_humidity_pct",
+        "weather_warning"
+      ],
+      "status": "success",
+      "generated_at": "2026-09-18T06:39:58.712106+00:00",
+      "manifest": "C:\\Users\\Asus\\Downloads\\agripulse\\agripulse\\data\\india\\gold\\india_crop_summary\\manifest.json"
+    }
+  ]
+}

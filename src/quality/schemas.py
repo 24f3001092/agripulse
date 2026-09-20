@@ -1,11 +1,16 @@
 """
 schemas.py
 Pandera schema definitions enforcing data-quality contracts on Silver-layer
-datasets. Each schema is the "data quality gate" a real record must pass
-before being promoted from Bronze to Silver. Failures are collected and
-logged (not silently dropped) so pipeline operators can see exactly which
-rows/columns broke the contract -- mirrors the "monitoring and alerting for
-pipeline and data quality issues" requirement.
+datasets for the active country profile (AgriPulse India). Each schema is the
+"data quality gate" a real record must pass before being promoted from Bronze
+to Silver. Failures are collected and logged (not silently dropped) so pipeline
+operators can see exactly which rows/columns broke the contract.
+
+Contracts:
+  * weather_schema          - daily Open-Meteo weather, metric units (deg C, mm, %, km/h)
+  * geo_india_schema        - India geography reference: State/UT > District > Mandi/APMC
+  * market_commodity_schema - e-NAM / AGMARKNET market rows (INR per quintal) -- only
+                              validated when a live loader is configured; never fabricated
 """
 
 import pandera.pandas as pa
@@ -29,26 +34,34 @@ weather_schema = DataFrameSchema(
     coerce=True,
 )
 
-ag_exports_schema = DataFrameSchema(
+# India geography: a monitored district with its market committee (mandi/APMC)
+# used as the weather-API anchor point.
+geo_india_schema = DataFrameSchema(
     {
+        "region_name": Column(str, nullable=False),
+        "state_ut": Column(str, nullable=False),
         "state_code": Column(str, Check.str_length(2, 2), nullable=False),
-        "state_name": Column(str, nullable=False),
-        "total_exports_musd": Column(float, Check.ge(0), nullable=False),
-        "corn_musd": Column(float, Check.ge(0), nullable=False),
-        "wheat_musd": Column(float, Check.ge(0), nullable=False),
-        "cotton_musd": Column(float, Check.ge(0), nullable=False),
-        "dairy_musd": Column(float, Check.ge(0), nullable=False),
+        "district": Column(str, nullable=False),
+        "mandi_apmc": Column(str, nullable=False),
+        "latitude": Column(float, Check.in_range(6, 37), nullable=False),
+        "longitude": Column(float, Check.in_range(68, 98), nullable=False),
     },
     strict=False,
     coerce=True,
 )
 
-geo_schema = DataFrameSchema(
+# e-NAM / AGMARKNET market-rows contract (INR per quintal). Only enforced when a
+# real loader is configured; this schema is the documented target shape.
+market_commodity_schema = DataFrameSchema(
     {
-        "state_name": Column(str, nullable=False),
-        "capital": Column(str, nullable=False),
-        "latitude": Column(float, Check.in_range(-90, 90), nullable=False),
-        "longitude": Column(float, Check.in_range(-180, 180), nullable=False),
+        "commodity": Column(str, nullable=False),
+        "variety": Column(str, nullable=True),
+        "state_ut": Column(str, nullable=False),
+        "district": Column(str, nullable=False),
+        "mandi": Column(str, nullable=False),
+        "date": Column(pa.DateTime, nullable=False),
+        "market_price_inr_per_quintal": Column(float, Check.ge(0), nullable=False),
+        "arrivals_quintal": Column(float, Check.ge(0), nullable=False),
     },
     strict=False,
     coerce=True,

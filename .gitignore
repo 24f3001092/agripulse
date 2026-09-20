@@ -13,15 +13,33 @@ data/gold/*
 !data/silver/.gitkeep
 !data/gold/.gitkeep
 
-# Generated catalog outputs
+# India pipeline (active country): generated layers are gitignored.
+data/india/bronze/*
+data/india/silver/*
+data/india/gold/*
+data/india/catalog/*
+!data/india/bronze/.gitkeep
+!data/india/silver/.gitkeep
+!data/india/gold/.gitkeep
+!data/india/catalog/.gitkeep
+
+# NOTE: data/demo/ and data/india/demo/ hold REAL minimum pipeline outputs that
+# the deployed Streamlit Cloud dashboard reads when local generated artifacts
+# are absent (the generated files above are gitignored, so they never reach the
+# repo). data/demo/ and data/india/demo/ ARE intentionally tracked -- do not
+# ignore them.
+
+# Transition snapshot of the previous U.S.-focused build (kept for recovery;
+# content recoverable from git history and from the other branches).
+data/existing/*
+!data/existing/current/
+data/existing/current/*
+!data/existing/current/README.md
+
+# Generated catalog outputs (per-country)
 catalog/health_report.json
 catalog/model_report.json
 catalog/prediction_run.json
-
-# NOTE: data/demo/ holds the REAL, minimum pipeline outputs that the deployed
-# Streamlit Cloud dashboard reads when local generated artifacts are absent
-# (generated files above are gitignored, so they never reach the repo).
-# data/demo/ is intentionally tracked -- do NOT ignore it.
 
 # Secrets and credentials -- never commit these
 .env

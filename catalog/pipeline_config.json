@@ -1,0 +1,14 @@
+{
+  "country": "india",
+  "comment": "Active AgriPulse country profile. The pipeline, data trees (data/<country>/), schemas, currency/unit conventions and the dashboard all read this switch. Override at runtime with env AGRIPULSE_COUNTRY if a second profile is added later.",
+  "currency": { "code": "INR", "symbol": "\u20b9" },
+  "units": {
+    "price_basis": "per quintal (100 kg) as used by e-NAM / AGMARKNET",
+    "weight": "quintal", "weight_kg": 100,
+    "temperature": "degC", "precipitation": "mm", "humidity": "%", "wind": "km/h"
+  },
+  "geography_levels": ["country", "state_ut", "district", "mandi_apmc"],
+  "regions_config": "catalog/india_regions.json",
+  "commodities_config": "catalog/india/commodities.json",
+  "market_source": "not_configured"
+}

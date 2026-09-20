@@ -1,0 +1,11 @@
+{
+  "model_status": "not_generated",
+  "target_variable": "market_price_signal_inr_per_quintal",
+  "reason": "Market prices/arrivals are NOT yet integrated: the e-NAM / AGMARKNET source is an extension point that has not been registered as configured. Without a real market target (INR per quintal) no forecast can be trained -- training on fabricated numbers would be misleading.",
+  "required_upstream": [
+    "market source configured (catalog/pipeline_config.json -> market_source: configured)",
+    "e-NAM / AGMARKNET loader registered (src/ingestion/india_market_source.py)",
+    "data/india/silver/market.parquet present (market table through Bronze->Silver gate)"
+  ],
+  "generated_at_utc": "2026-09-18T06:40:07.169514+00:00"
+}

@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "dataset": "agmarknet-daily-apmc",
+  "source": "AGMARKNET (Directorate of Marketing & Inspection, MoAFW) daily APMC price & arrival records via the India Data Portal -- GODL-India",
+  "generated_at": "2026-09-18T06:39:21.670071+00:00",
+  "period": [
+    "2026-04-01",
+    "2026-05-31"
+  ],
+  "last_data_date": "2026-05-31",
+  "silver_rows": 54710,
+  "summary_rows": 1830,
+  "n_markets": 104,
+  "n_commodities": 177,
+  "n_states": 10,
+  "metrics": [
+    "latest_modal_price",
+    "latest_min_price",
+    "latest_max_price",
+    "latest_arrival_quantity",
+    "avg_modal_price_7d",
+    "modal_price_change_pct_7d",
+    "arrival_change_pct_7d",
+    "state_latest_modal_price",
+    "modal_pct_vs_state_latest"
+  ],
+  "metrics_rule": "change metrics are null when the history does not support them (fewer than one comparison day or zero baseline)",
+  "units_rule": "prices compared only within the same price_unit and arrivals only within the same arrival_units",
+  "no_traded_quantity": "AGMARKNET does not report a traded quantity; traded_quantity is never synthesized",
+  "disclaimer": "Observed wholesale prices and arrivals from official AGMARKNET records. Analytical signals only -- not investment advice and no guaranteed outcomes."
+}

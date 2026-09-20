@@ -1,0 +1,29 @@
+{
+  "pipeline": "agripulse_prediction_pipeline",
+  "country": "india",
+  "run_at_utc": "2026-09-18T06:40:07.198781+00:00",
+  "steps": [
+    {
+      "step": "demand_forecast",
+      "status": "skipped_market_gate",
+      "output": "data/india/catalog/ml_status.json",
+      "rows": 0,
+      "detail": "Forecast requires a real market target (e-NAM / AGMARKNET). Source not configured; ml_status.json records not_generated. No forecast fabricated."
+    },
+    {
+      "step": "weather_exposure_segmentation",
+      "status": "success",
+      "output": "data/india/gold/region_segments.parquet",
+      "rows": 10
+    }
+  ],
+  "model": {
+    "name": "market_price_signal_inr_per_quintal",
+    "status": "not_generated"
+  },
+  "market_source": "not_configured",
+  "outputs": [
+    "data/india/gold/region_segments.parquet",
+    "data/india/catalog/ml_status.json"
+  ]
+}

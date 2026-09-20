@@ -1,0 +1,23 @@
+{
+  "_comment": "AgriPulse India commodity / crop reference. Factual commodity metadata only -- NO prices, arrivals or yields are stored here. Market prices come only from the live source once integrated (e-NAM / AGMARKNET). e-NAM and AGMARKNET report prices per quintal (100 kg); all INR. Category values: cereal, pulse, oilseed, commercial, horticulture, sugarcane.",
+  "currency": { "code": "INR", "symbol": "\u20b9" },
+  "price_basis": "per quintal (100 kg)",
+  "commodities": [
+    {"commodity": "Rice (Paddy)", "category": "cereal",     "state": "pan-India"},
+    {"commodity": "Wheat",        "category": "cereal",     "state": "pan-India"},
+    {"commodity": "Maize",        "category": "cereal",     "state": "pan-India"},
+    {"commodity": "Bajra",        "category": "cereal",     "state": "pan-India"},
+    {"commodity": "Tur (Arhar)",  "category": "pulse",      "state": "pan-India"},
+    {"commodity": "Chana (Gram)", "category": "pulse",      "state": "pan-India"},
+    {"commodity": "Moong",        "category": "pulse",      "state": "pan-India"},
+    {"commodity": "Urad",         "category": "pulse",      "state": "pan-India"},
+    {"commodity": "Groundnut",    "category": "oilseed",    "state": "pan-India"},
+    {"commodity": "Soybean",      "category": "oilseed",    "state": "pan-India"},
+    {"commodity": "Mustard",      "category": "oilseed",    "state": "pan-India"},
+    {"commodity": "Raw Cotton (Kapas)", "category": "commercial", "state": "pan-India"},
+    {"commodity": "Sugarcane",    "category": "sugarcane",  "state": "pan-India"},
+    {"commodity": "Onion",        "category": "horticulture", "state": "pan-India"},
+    {"commodity": "Potato",       "category": "horticulture", "state": "pan-India"},
+    {"commodity": "Tomato",       "category": "horticulture", "state": "pan-India"}
+  ]
+}

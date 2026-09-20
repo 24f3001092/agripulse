@@ -1,0 +1,701 @@
+{
+  "_meta": {
+    "purpose": "Canonical crop registry for the India agriculture pipeline (Area/Production/Yield).",
+    "rule": "Canonical names are source-faithful. Crops whose names merely look similar are NEVER merged (e.g. Arhar/Tur and Tur stay distinct). Aliases map only unambiguous spelling/whitespace variants of the same crop.",
+    "derived_from": "Unique crop_name values observed in the DES/MoAFW 'Crop Wise Area Production Yield' dataset (GODL-India, via India Data Portal) as downloaded for ingestion.",
+    "source_catalog": "https://data.gov.in/catalog/district-wise-season-wise-crop-production-statistics-0",
+    "count": 115
+  },
+  "crops": [
+    {
+      "name": "Apple",
+      "canonical": "Apple",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Arcanut (Processed)",
+      "canonical": "Arcanut (Processed)",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Arecanut",
+      "canonical": "Arecanut",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Arhar/Tur",
+      "canonical": "Arhar/Tur",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Ash Gourd",
+      "canonical": "Ash Gourd",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Atcanut (Raw)",
+      "canonical": "Atcanut (Raw)",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Bajra",
+      "canonical": "Bajra",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Banana",
+      "canonical": "Banana",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Barley",
+      "canonical": "Barley",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Beet Root",
+      "canonical": "Beet Root",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Ber",
+      "canonical": "Ber",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Bhindi",
+      "canonical": "Bhindi",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Bitter Gourd",
+      "canonical": "Bitter Gourd",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Black Pepper",
+      "canonical": "Black Pepper",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Bottle Gourd",
+      "canonical": "Bottle Gourd",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Brinjal",
+      "canonical": "Brinjal",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Cabbage",
+      "canonical": "Cabbage",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Cardamom",
+      "canonical": "Cardamom",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Carrot",
+      "canonical": "Carrot",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Cashewnut",
+      "canonical": "Cashewnut",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Cashewnut Processed",
+      "canonical": "Cashewnut Processed",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Cashewnut Raw",
+      "canonical": "Cashewnut Raw",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Castor Seed",
+      "canonical": "Castor Seed",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Cauliflower",
+      "canonical": "Cauliflower",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Citrus Fruit",
+      "canonical": "Citrus Fruit",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Coconut",
+      "canonical": "Coconut",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Coffee",
+      "canonical": "Coffee",
+      "category": "Plantation Crops",
+      "aliases": []
+    },
+    {
+      "name": "Colocosia",
+      "canonical": "Colocosia",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Cond-Spcs Other",
+      "canonical": "Cond-Spcs Other",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Coriander",
+      "canonical": "Coriander",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Cotton(Lint)",
+      "canonical": "Cotton(Lint)",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Cowpea(Lobia)",
+      "canonical": "Cowpea(Lobia)",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Cucumber",
+      "canonical": "Cucumber",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Drum Stick",
+      "canonical": "Drum Stick",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Dry Chillies",
+      "canonical": "Dry Chillies",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Dry Ginger",
+      "canonical": "Dry Ginger",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Garlic",
+      "canonical": "Garlic",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Ginger",
+      "canonical": "Ginger",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Gram",
+      "canonical": "Gram",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Grapes",
+      "canonical": "Grapes",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Groundnut",
+      "canonical": "Groundnut",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Guar Seed",
+      "canonical": "Guar Seed",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Horse-Gram",
+      "canonical": "Horse-Gram",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Jack Fruit",
+      "canonical": "Jack Fruit",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Jobster",
+      "canonical": "Jobster",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Jowar",
+      "canonical": "Jowar",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Jute",
+      "canonical": "Jute",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Jute & Mesta",
+      "canonical": "Jute & Mesta",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Kapas",
+      "canonical": "Kapas",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Khesari",
+      "canonical": "Khesari",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Korra",
+      "canonical": "Korra",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Lab-Lab",
+      "canonical": "Lab-Lab",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Lemon",
+      "canonical": "Lemon",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Linseed",
+      "canonical": "Linseed",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Litchi",
+      "canonical": "Litchi",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Maize",
+      "canonical": "Maize",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Mango",
+      "canonical": "Mango",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Masoor",
+      "canonical": "Masoor",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Mesta",
+      "canonical": "Mesta",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Moong(Green Gram)",
+      "canonical": "Moong(Green Gram)",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Moth",
+      "canonical": "Moth",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Niger Seed",
+      "canonical": "Niger Seed",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Onion",
+      "canonical": "Onion",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Orange",
+      "canonical": "Orange",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Other Cereals",
+      "canonical": "Other Cereals",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Other Citrus Fruit",
+      "canonical": "Other Citrus Fruit",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Other Dry Fruit",
+      "canonical": "Other Dry Fruit",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Other Fresh Fruits",
+      "canonical": "Other Fresh Fruits",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Other Kharif Pulses",
+      "canonical": "Other Kharif Pulses",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Other Misc. Pulses",
+      "canonical": "Other Misc. Pulses",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Other Oilseeds",
+      "canonical": "Other Oilseeds",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Other Rabi Pulses",
+      "canonical": "Other Rabi Pulses",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Other Summer Pulses",
+      "canonical": "Other Summer Pulses",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Other Vegetables",
+      "canonical": "Other Vegetables",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Papaya",
+      "canonical": "Papaya",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Peach",
+      "canonical": "Peach",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Pear",
+      "canonical": "Pear",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Peas & Beans (Pulses)",
+      "canonical": "Peas & Beans (Pulses)",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Peas (Vegetable)",
+      "canonical": "Peas (Vegetable)",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Perilla",
+      "canonical": "Perilla",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Pineapple",
+      "canonical": "Pineapple",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Plums",
+      "canonical": "Plums",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Pome Fruit",
+      "canonical": "Pome Fruit",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Pome Granet",
+      "canonical": "Pome Granet",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Potato",
+      "canonical": "Potato",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Ragi",
+      "canonical": "Ragi",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Rajmash Kholar",
+      "canonical": "Rajmash Kholar",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Rapeseed &Mustard",
+      "canonical": "Rapeseed &Mustard",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Redish",
+      "canonical": "Redish",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Ribed Guard",
+      "canonical": "Ribed Guard",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Rice",
+      "canonical": "Rice",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Ricebean (Nagadal)",
+      "canonical": "Ricebean (Nagadal)",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Rubber",
+      "canonical": "Rubber",
+      "category": "Plantation Crops",
+      "aliases": []
+    },
+    {
+      "name": "Safflower",
+      "canonical": "Safflower",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Samai",
+      "canonical": "Samai",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Sannhamp",
+      "canonical": "Sannhamp",
+      "category": "Fiber Crops",
+      "aliases": []
+    },
+    {
+      "name": "Sapota",
+      "canonical": "Sapota",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Sesamum",
+      "canonical": "Sesamum",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Small Millets",
+      "canonical": "Small Millets",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Snak Guard",
+      "canonical": "Snak Guard",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Soyabean",
+      "canonical": "Soyabean",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Sugarcane",
+      "canonical": "Sugarcane",
+      "category": "Sugar",
+      "aliases": []
+    },
+    {
+      "name": "Sunflower",
+      "canonical": "Sunflower",
+      "category": "Oilseeds",
+      "aliases": []
+    },
+    {
+      "name": "Sweet Potato",
+      "canonical": "Sweet Potato",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Tapioca",
+      "canonical": "Tapioca",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Tea",
+      "canonical": "Tea",
+      "category": "Plantation Crops",
+      "aliases": []
+    },
+    {
+      "name": "Tobacco",
+      "canonical": "Tobacco",
+      "category": "Drugs And Narcotics",
+      "aliases": []
+    },
+    {
+      "name": "Tomato",
+      "canonical": "Tomato",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Turmeric",
+      "canonical": "Turmeric",
+      "category": "Spices",
+      "aliases": []
+    },
+    {
+      "name": "Turnip",
+      "canonical": "Turnip",
+      "category": "Vegetable",
+      "aliases": []
+    },
+    {
+      "name": "Urad",
+      "canonical": "Urad",
+      "category": "Pulses",
+      "aliases": []
+    },
+    {
+      "name": "Varagu",
+      "canonical": "Varagu",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Water Melon",
+      "canonical": "Water Melon",
+      "category": "Fruits",
+      "aliases": []
+    },
+    {
+      "name": "Wheat",
+      "canonical": "Wheat",
+      "category": "Cereals",
+      "aliases": []
+    },
+    {
+      "name": "Yam",
+      "canonical": "Yam",
+      "category": "Vegetable",
+      "aliases": []
+    }
+  ]
+}

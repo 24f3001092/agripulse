@@ -1,12 +1,14 @@
 """
 agripulse_dag.py
-Airflow DAG orchestrating the AgriPulse pipeline daily.
+Airflow DAG orchestrating the AgriPulse INDIA pipeline daily.
 
 Task dependency graph:
 
     ingest_weather ─┐
-    ingest_market   ├──> bronze_to_silver ──> silver_to_gold ──> monitor ──> prediction_pipeline
-    ingest_geo     ─┘
+    ingest_market   ├──> bronze_to_silver ──────> silver_to_gold ──────────────┐
+    ingest_geo     ─┘            │                                             │
+                                 └──> india_gold_summary ──> india_forecast ───┤
+                                                                               └──> monitor ──> prediction_pipeline
 
 Drop this file into your Airflow $AIRFLOW_HOME/dags/ directory. It assumes the
 AgriPulse repo is checked out at PROJECT_ROOT on the Airflow worker.
@@ -19,10 +21,17 @@ Environment notes:
     run_pipeline.py script handles this automatically; this DAG is the
     Airflow-side equivalent and assumes a properly configured worker env.
 
-market/geo ingestion are shown as separate tasks for a real deployment
-where they'd hit live APIs on their own schedule; in this repo they are
-pre-fetched static CSVs, so those tasks are no-ops here but kept in the
-graph to reflect the production shape.
+India climate profile (active country on this branch):
+  * geography: India > State/UT > District > Mandi/APMC (catalog/india_regions.json)
+  * weather:   live Open-Meteo API for monitored districts
+  * mandi:     daily AGMARKNET APMC price/arrival record import
+               (src/ingestion/india_mandi.py), summarized to Gold by the
+               india_gold_summary task (region x date features, crop summary,
+               market summary; graceful no_data manifests without bronze)
+  * market:    e-NAM live feed -- OFFICIAL extension point. Until a loader is
+               registered (india_market_source.py) and pipeline_config sets
+               market_source: configured, the ingest_market task is a documented
+               no-op and the market-price forecast honestly reports not_generated.
 """
 
 from datetime import datetime, timedelta
@@ -51,8 +60,9 @@ default_args = {
 with DAG(
     dag_id="agripulse_external_data_pipeline",
     description=(
-        "Ingest weather/market/geo data -> Silver -> Gold -> monitor health "
-        "-> run prototype forecast + regional segmentation"
+        "Ingest India weather/geo data -> Silver -> Gold -> India crop-production "
+        "forecast (prototype) -> monitor health -> weather-exposure segmentation "
+        "+ market-gated forecast (e-NAM/AGMARKNET)"
     ),
     default_args=default_args,
     schedule_interval="0 4 * * *",  # daily at 04:00 UTC
@@ -65,23 +75,26 @@ with DAG(
         task_id="ingest_weather",
         bash_command=(
             f"cd {PROJECT_ROOT} && {PYTHON_BIN} src/ingestion/weather_api.py "
-            f"--config catalog/regions.json --out data/bronze"
+            f"--config catalog/india_regions.json --out data/india/bronze"
         ),
     )
 
     ingest_market = BashOperator(
         task_id="ingest_market",
         bash_command=(
-            "echo 'Market data source refresh -- replace with real API/SFTP pull "
-            "when moving beyond the static demo CSV in data/bronze/us_ag_exports_raw.csv'"
+            "echo 'e-NAM (enam.gov.in) / AGMARKNET (agmarknet.gov.in) market pull -- "
+            "NOT INTEGRATED. Register a loader in src/ingestion/india_market_source.py "
+            "and set market_source=configured in catalog/pipeline_config.json. "
+            "No market values are fabricated while unconfigured.'"
         ),
     )
 
     ingest_geo = BashOperator(
         task_id="ingest_geo",
         bash_command=(
-            "echo 'Geospatial reference data refresh -- static in this build, "
-            "would hook to a geocoding/boundary service in production'"
+            "echo 'India geography reference -- static in this build "
+            "(catalog/india_regions.json); production would refine coordinates "
+            "against an official gazetteer / boundary service.'"
         ),
     )
 
@@ -90,9 +103,29 @@ with DAG(
         bash_command=f"cd {PROJECT_ROOT} && {PYTHON_BIN} src/transform/bronze_to_silver.py",
     )
 
+    # India integrated agricultural Gold layer: region x date features, the
+    # Location + Crop (+ Date/Year) crop summary, and the AGMARKNET market
+    # summary (reusing mandi_to_gold). Graceful no_data manifests when the
+    # corresponding Silver inputs are absent.
+    india_gold_summary = BashOperator(
+        task_id="india_gold_summary",
+        bash_command=(
+            f"cd {PROJECT_ROOT} && {PYTHON_BIN} src/transform/india_silver_to_gold.py"
+        ),
+    )
+
     silver_to_gold = BashOperator(
         task_id="silver_to_gold",
         bash_command=f"cd {PROJECT_ROOT} && {PYTHON_BIN} src/transform/silver_to_gold.py",
+    )
+
+    # India crop-production forecast: strict temporal split, prototype only.
+    # Trains on the 1997..2023 DE&S/MoAFW panel (india_crop_year); prices and
+    # arrivals are NOT forecast (insufficient daily history) -- nothing is
+    # fabricated. Writes gold/india_forecasts.parquet + catalog/india_model_report.json.
+    india_forecast = BashOperator(
+        task_id="india_forecast",
+        bash_command=f"cd {PROJECT_ROOT} && {PYTHON_BIN} src/ml/india_forecast.py",
     )
 
     monitor = BashOperator(
@@ -110,7 +143,8 @@ with DAG(
     (
         [ingest_weather, ingest_market, ingest_geo]
         >> bronze_to_silver
-        >> silver_to_gold
-        >> monitor
-        >> prediction_pipeline
     )
+    bronze_to_silver >> silver_to_gold
+    bronze_to_silver >> india_gold_summary >> india_forecast
+    [silver_to_gold, india_forecast] >> monitor
+    monitor >> prediction_pipeline
